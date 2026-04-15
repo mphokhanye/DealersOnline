@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
-import { Fuel, Tag, ArrowLeftRight, Search, FileCheck } from "lucide-react";
+import { Fuel, Tag, ArrowLeftRight, Search, FileCheck, CircleDollarSign } from "lucide-react";
 
 interface VehicleSearchProps {
   query: string;
@@ -19,30 +19,32 @@ const CARS = [
   { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/mo", plan: true, accidents: 0, fuel: 6.2, match: 79, tag: "Low mileage" },
 ];
 
+type ModalType = "fuel" | "reduce" | "tradeIn" | "balloon" | null;
+
 function FuelModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void }) {
   const [commute, setCommute] = useState("same");
   const fuelPrice = 21.5;
   const km = commute === "same" ? 30 * 2 * 22 : 120 * 2 * 22;
   const cost = Math.round((km / 100) * car.fuel * fuelPrice);
   return (
-    <div className="fixed inset-0 bg-dark/70 flex items-end justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
       <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <h3 className="font-heading text-xl text-foreground mb-1">⛽ Fuel cost estimate</h3>
+        <h3 className="font-heading text-xl font-bold text-foreground mb-1">⛽ Fuel cost estimate</h3>
         <p className="text-[13px] text-soft mb-5">{car.year} {car.make} {car.model} · {car.fuel}L/100km</p>
         <p className="text-[13px] text-foreground font-semibold mb-2.5">Do you live and work in the same city?</p>
         <div className="flex gap-2 mb-5">
           {([["same", "Yes, same city"], ["diff", "Different cities"]] as const).map(([val, label]) => (
             <button key={val} onClick={() => setCommute(val)} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer border-none transition-colors ${
-              commute === val ? "bg-terra text-primary-foreground" : "bg-sand text-mid"
+              commute === val ? "bg-terra text-primary-foreground" : "bg-muted text-soft"
             }`}>{label}</button>
           ))}
         </div>
-        <div className="bg-dark rounded-2xl px-5 py-4 text-center">
+        <div className="bg-muted rounded-2xl px-5 py-4 text-center">
           <p className="text-xs text-soft mb-1 m-0">Estimated monthly fuel cost</p>
-          <p className="font-heading text-4xl text-terra m-0 mb-1">R{cost.toLocaleString()}</p>
+          <p className="font-heading text-4xl font-bold text-terra m-0 mb-1">R{cost.toLocaleString()}</p>
           <p className="text-[11px] text-soft m-0">Based on ~{Math.round(km).toLocaleString()} km/month · R{fuelPrice}/L</p>
         </div>
-        <button onClick={onClose} className="w-full mt-4 py-3 rounded-full bg-sand text-mid border-none text-sm font-semibold cursor-pointer">Close</button>
+        <button onClick={onClose} className="w-full mt-4 py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
       </div>
     </div>
   );
@@ -52,9 +54,9 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
   const discount = Math.round(parseInt(car.price.replace(/\D/g, "")) * 0.08);
   const newPrice = parseInt(car.price.replace(/\D/g, "")) - discount;
   return (
-    <div className="fixed inset-0 bg-dark/70 flex items-end justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
       <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <h3 className="font-heading text-xl text-foreground mb-1">💰 Max discount applied</h3>
+        <h3 className="font-heading text-xl font-bold text-foreground mb-1">💰 Max discount applied</h3>
         <p className="text-[13px] text-soft mb-4">{car.year} {car.make} {car.model}</p>
         <div className="bg-success-bg rounded-xl px-4 py-3 mb-3">
           <div className="flex justify-between items-center">
@@ -62,11 +64,74 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
             <span className="text-sm text-success font-bold">-R{discount.toLocaleString()}</span>
           </div>
         </div>
-        <div className="bg-dark rounded-2xl px-5 py-4 text-center">
+        <div className="bg-muted rounded-2xl px-5 py-4 text-center">
           <p className="text-xs text-soft mb-1 m-0">Reduced price</p>
-          <p className="font-heading text-3xl text-terra m-0">R{newPrice.toLocaleString()}</p>
+          <p className="font-heading text-3xl font-bold text-terra m-0">R{newPrice.toLocaleString()}</p>
         </div>
-        <button onClick={onClose} className="w-full mt-4 py-3 rounded-full bg-sand text-mid border-none text-sm font-semibold cursor-pointer">Close</button>
+        <button onClick={onClose} className="w-full mt-4 py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
+      </div>
+    </div>
+  );
+}
+
+function BalloonModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void }) {
+  const price = parseInt(car.price.replace(/\D/g, ""));
+  const balloonPercent = 20;
+  const balloonAmount = Math.round(price * balloonPercent / 100);
+  const financed = price - balloonAmount;
+  // Rough monthly calc: financed over 72 months at ~11.5%
+  const r = 0.115 / 12;
+  const n = 72;
+  const monthlyWithBalloon = Math.round((financed * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
+  const monthlyWithout = Math.round((price * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
+  const saving = monthlyWithout - monthlyWithBalloon;
+
+  // Value retention signal
+  const holdsValue = car.match > 85;
+
+  return (
+    <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
+      <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <h3 className="font-heading text-xl font-bold text-foreground mb-1">🎈 Balloon payment option</h3>
+        <p className="text-[13px] text-soft mb-4">{car.year} {car.make} {car.model}</p>
+
+        <div className="bg-terra/10 border border-terra/20 rounded-lg px-3.5 py-2.5 mb-4">
+          <p className="text-xs text-terra leading-relaxed m-0">💡 A balloon reduces your monthly but means a lump sum at the end of your term.</p>
+        </div>
+
+        <div className="bg-muted rounded-xl px-4 py-3 mb-3">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs text-soft">Without balloon</span>
+            <span className="text-sm font-semibold text-foreground">R{monthlyWithout.toLocaleString()}/mo</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-soft">With {balloonPercent}% balloon</span>
+            <span className="text-sm font-bold text-terra">R{monthlyWithBalloon.toLocaleString()}/mo</span>
+          </div>
+        </div>
+
+        <div className="bg-success-bg rounded-xl px-4 py-3 mb-3">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-success font-semibold">Monthly saving</span>
+            <span className="text-sm text-success font-bold">R{saving.toLocaleString()}/mo</span>
+          </div>
+        </div>
+
+        <div className="bg-muted rounded-xl px-4 py-3 mb-3">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs text-soft">Balloon due at end of term</span>
+            <span className="text-sm font-semibold text-foreground">R{balloonAmount.toLocaleString()}</span>
+          </div>
+        </div>
+
+        {/* Value retention signal */}
+        <div className={`rounded-xl px-4 py-3 mb-4 ${holdsValue ? "bg-success-bg" : "bg-warning-bg"}`}>
+          <p className={`text-xs font-semibold m-0 ${holdsValue ? "text-success" : "text-warning"}`}>
+            {holdsValue ? "✓ This model holds its value well — balloon is a smart option" : "⚠ This model may depreciate faster — consider carefully"}
+          </p>
+        </div>
+
+        <button onClick={onClose} className="w-full py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
       </div>
     </div>
   );
@@ -80,7 +145,6 @@ function TradeInModal({ onClose }: { onClose: () => void }) {
   function calculate() {
     const rep = parseInt(repayment) || 0;
     const mo = parseInt(months) || 0;
-    const totalPaid = rep * mo;
     const estimatedValue = 120000;
     const settlement = Math.max(0, (rep * (72 - mo)) * 0.6);
     const equity = estimatedValue - settlement;
@@ -89,9 +153,9 @@ function TradeInModal({ onClose }: { onClose: () => void }) {
 
   if (step === 0) {
     return (
-      <div className="fixed inset-0 bg-dark/70 flex items-end justify-center z-50" onClick={onClose}>
+      <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
         <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-          <h3 className="font-heading text-xl text-foreground mb-1">🔄 Trade-in estimate</h3>
+          <h3 className="font-heading text-xl font-bold text-foreground mb-1">🔄 Trade-in estimate</h3>
           <p className="text-[13px] text-soft mb-5">Let's estimate your current vehicle's position.</p>
           <div className="mb-3">
             <label className="text-[11px] text-soft block mb-1.5 font-semibold uppercase tracking-wider">Current monthly repayment (R)</label>
@@ -115,14 +179,14 @@ function TradeInModal({ onClose }: { onClose: () => void }) {
   const msg = messages[step];
 
   return (
-    <div className="fixed inset-0 bg-dark/70 flex items-end justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
       <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className={`${msg.bg} rounded-xl px-4 py-4 mb-4`}>
           <p className="text-lg mb-1">{msg.emoji}</p>
           <h4 className={`font-semibold text-sm ${msg.color} mb-1`}>{msg.title}</h4>
           <p className={`text-xs ${msg.color} opacity-80 m-0`}>{msg.desc}</p>
         </div>
-        <button onClick={onClose} className="w-full py-3 rounded-full bg-sand text-mid border-none text-sm font-semibold cursor-pointer">Close</button>
+        <button onClick={onClose} className="w-full py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
       </div>
     </div>
   );
@@ -133,10 +197,10 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
   const [cardIdx, setCardIdx] = useState(0);
   const [liked, setLiked] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState("match");
-  const [fuelCar, setFuelCar] = useState<typeof CARS[0] | null>(null);
-  const [reduceCar, setReduceCar] = useState<typeof CARS[0] | null>(null);
-  const [showTradeIn, setShowTradeIn] = useState(false);
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [modalCar, setModalCar] = useState<typeof CARS[0] | null>(null);
   const [searchQ, setSearchQ] = useState("");
+  const [bankOfferCar, setBankOfferCar] = useState<typeof CARS[0] | null>(null);
   const name = prequalified ? "Lerato" : "there";
   const isCash = answers?.paymenttype === "cash";
 
@@ -154,13 +218,17 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
 
   const cur = CARS[cardIdx];
 
+  function openModal(type: ModalType, car: typeof CARS[0]) {
+    setModalCar(car);
+    setModalType(type);
+  }
+
   function swipe(dir: string) {
     if (dir === "right") setLiked(l => [...l, cur.id]);
     if (cardIdx < CARS.length - 1) setCardIdx(i => i + 1);
     else setMode("list");
   }
 
-  // Journey summary rows
   const journeyRows = [
     ["Needs", answers?.firsttime === "yes" ? "First car · Finance" : "Upgrade · Finance"],
     ["Budget", prequalified ? "R5,450/pm Pre-Qualified" : "Not yet checked"],
@@ -168,15 +236,23 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
     ["Protection", "Finance Contract AI Scan"],
   ];
 
+  // If bank offers screen is active
+  if (bankOfferCar) {
+    // Dynamic import would be cleaner but let's keep it simple
+    const BankOffersLazy = require("./BankOffers").BankOffers;
+    return <BankOffersLazy car={bankOfferCar} onNav={onNav} onClose={() => setBankOfferCar(null)} />;
+  }
+
   return (
     <div className="bg-background min-h-screen">
-      {fuelCar && <FuelModal car={fuelCar} onClose={() => setFuelCar(null)} />}
-      {reduceCar && <ReducePriceModal car={reduceCar} onClose={() => setReduceCar(null)} />}
-      {showTradeIn && <TradeInModal onClose={() => setShowTradeIn(false)} />}
-      <TopBar title="drive." onBack={() => onNav("landing")} />
+      {modalType === "fuel" && modalCar && <FuelModal car={modalCar} onClose={() => setModalType(null)} />}
+      {modalType === "reduce" && modalCar && <ReducePriceModal car={modalCar} onClose={() => setModalType(null)} />}
+      {modalType === "balloon" && modalCar && <BalloonModal car={modalCar} onClose={() => setModalType(null)} />}
+      {modalType === "tradeIn" && <TradeInModal onClose={() => setModalType(null)} />}
+      <TopBar onBack={() => onNav("landing")} />
 
       <div className="px-5 pt-4 max-w-md mx-auto">
-        <h2 className="font-heading text-2xl text-foreground mb-3.5">
+        <h2 className="font-heading text-2xl font-bold text-foreground mb-3.5">
           Hi, <span className="text-terra">{name}</span> 👋
         </h2>
 
@@ -189,7 +265,6 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
               <span className="text-xs text-foreground leading-relaxed font-medium">{val}</span>
             </div>
           ))}
-          {/* Get quote under insurance */}
           <div className="mt-3 pt-3 border-t border-sand flex gap-2">
             <button className="flex-1 bg-terra text-primary-foreground border-none rounded-full py-2.5 text-xs font-semibold cursor-pointer">
               Get Insurance Quote
@@ -218,7 +293,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
         <div className="flex gap-2 mb-4">
           {([["tinder", "Quick swipe"], ["list", "Browse list"]] as const).map(([val, label]) => (
             <button key={val} onClick={() => setMode(val)} className={`flex-1 py-2.5 rounded-full text-sm font-semibold cursor-pointer border-[1.5px] transition-colors ${
-              mode === val ? "bg-dark text-primary-foreground border-dark" : "bg-card text-mid border-sand"
+              mode === val ? "bg-foreground text-card border-foreground" : "bg-card text-soft border-sand"
             }`}>{label}</button>
           ))}
         </div>
@@ -229,7 +304,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
         <div className="px-5 pb-6 max-w-md mx-auto">
           <p className="text-[11px] text-soft text-center mb-3">{cardIdx + 1} of {CARS.length} · tap to see more</p>
           <div className="bg-card border-[1.5px] border-sand rounded-2xl overflow-hidden mb-4">
-            <div className="bg-gradient-to-br from-sand to-muted h-40 flex items-center justify-center relative text-7xl">
+            <div className="bg-gradient-to-br from-muted to-sand h-40 flex items-center justify-center relative text-7xl">
               🚗
               <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{cur.tag}</div>
               {cur.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
@@ -237,7 +312,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="font-heading text-xl text-foreground m-0 mb-0.5">{cur.year} {cur.make} {cur.model}</h3>
+                  <h3 className="font-heading text-xl font-bold text-foreground m-0 mb-0.5">{cur.year} {cur.make} {cur.model}</h3>
                   <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.accidents === 0 ? "No accidents" : "1 minor accident"}</p>
                 </div>
                 <div className="text-right">
@@ -247,23 +322,34 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
               </div>
 
               {/* Action buttons row */}
-              <div className="flex gap-2 mb-3.5">
-                <button onClick={() => setFuelCar(cur)} className="flex-1 bg-warning-bg border border-warning/30 rounded-lg px-3 py-2 text-xs text-warning font-semibold cursor-pointer font-body flex items-center gap-1.5 justify-center">
-                  <Fuel size={12} /> Fuel cost
+              <div className="flex gap-1.5 mb-3.5 flex-wrap">
+                <button onClick={() => openModal("fuel", cur)} className="bg-warning-bg border border-warning/30 rounded-lg px-2.5 py-2 text-[11px] text-warning font-semibold cursor-pointer font-body flex items-center gap-1">
+                  <Fuel size={11} /> Fuel
                 </button>
-                <button onClick={() => setReduceCar(cur)} className="flex-1 bg-success-bg border border-success/30 rounded-lg px-3 py-2 text-xs text-success font-semibold cursor-pointer font-body flex items-center gap-1.5 justify-center">
-                  <Tag size={12} /> Reduce Price
+                <button onClick={() => openModal("reduce", cur)} className="bg-success-bg border border-success/30 rounded-lg px-2.5 py-2 text-[11px] text-success font-semibold cursor-pointer font-body flex items-center gap-1">
+                  <Tag size={11} /> Reduce
                 </button>
-                <button onClick={() => setShowTradeIn(true)} className="flex-1 bg-info-bg border border-info/30 rounded-lg px-3 py-2 text-xs text-info font-semibold cursor-pointer font-body flex items-center gap-1.5 justify-center">
-                  <ArrowLeftRight size={12} /> Trade-in
+                <button onClick={() => openModal("balloon", cur)} className="bg-terra/10 border border-terra/30 rounded-lg px-2.5 py-2 text-[11px] text-terra font-semibold cursor-pointer font-body flex items-center gap-1">
+                  <CircleDollarSign size={11} /> Balloon
+                </button>
+                <button onClick={() => openModal("tradeIn", cur)} className="bg-info-bg border border-info/30 rounded-lg px-2.5 py-2 text-[11px] text-info font-semibold cursor-pointer font-body flex items-center gap-1">
+                  <ArrowLeftRight size={11} /> Trade-in
                 </button>
               </div>
 
               {/* Swipe actions */}
-              <div className="flex gap-2.5">
+              <div className="flex gap-2.5 mb-2">
                 <button onClick={() => swipe("left")} className="flex-1 py-3 rounded-full bg-danger-bg text-danger border-[1.5px] border-danger/30 text-sm font-bold cursor-pointer">✕ Less like this</button>
                 <button onClick={() => swipe("right")} className="flex-1 py-3 rounded-full bg-success-bg text-success border-[1.5px] border-success/30 text-sm font-bold cursor-pointer">✓ More like this</button>
               </div>
+
+              {/* Get bank offer */}
+              <button
+                onClick={() => setBankOfferCar(cur)}
+                className="w-full py-3 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                {isCash ? "Make offer" : "Get bank offer"}
+              </button>
             </div>
           </div>
           <button onClick={() => setMode("list")} className="w-full bg-transparent border-none text-sm text-soft cursor-pointer hover:text-terra transition-colors">Skip to full list →</button>
@@ -276,7 +362,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
           <div className="flex gap-1.5 overflow-x-auto pb-2 mb-3.5">
             {([["match", "Best match"], ["instalment", "Lowest instalment"], ["fuel", "Lowest fuel cost"], ["deal", "Best deal"]] as const).map(([val, label]) => (
               <button key={val} onClick={() => setSortBy(val)} className={`rounded-full px-3.5 py-2 text-[11px] font-semibold cursor-pointer whitespace-nowrap font-body border-[1.5px] transition-colors ${
-                sortBy === val ? "bg-dark text-primary-foreground border-dark" : "bg-card text-mid border-sand"
+                sortBy === val ? "bg-foreground text-card border-foreground" : "bg-card text-soft border-sand"
               }`}>{label}</button>
             ))}
           </div>
@@ -284,7 +370,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
           {sorted.map(car => (
             <div key={car.id} className="bg-card border-[1.5px] border-sand rounded-2xl overflow-hidden mb-2.5">
               <div className="flex">
-                <div className="w-[90px] bg-gradient-to-br from-sand to-muted flex items-center justify-center text-4xl relative shrink-0">
+                <div className="w-[90px] bg-gradient-to-br from-muted to-sand flex items-center justify-center text-4xl relative shrink-0">
                   🚗
                   {car.plan && <div className="absolute bottom-1 left-1 bg-success text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-full">Plan ✓</div>}
                 </div>
@@ -295,21 +381,25 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
                   </div>
                   <p className="text-xs text-soft m-0 mb-2">{car.mileage} · {car.accidents === 0 ? "✓ No accidents" : "⚠ 1 accident"}</p>
                   <div className="flex gap-1.5 flex-wrap mb-2.5">
-                    <button onClick={() => setFuelCar(car)} className="bg-warning-bg border-none text-warning text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
+                    <button onClick={() => openModal("fuel", car)} className="bg-warning-bg border-none text-warning text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
                       <Fuel size={10} /> Fuel
                     </button>
-                    <button onClick={() => setReduceCar(car)} className="bg-success-bg border-none text-success text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
+                    <button onClick={() => openModal("reduce", car)} className="bg-success-bg border-none text-success text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
                       <Tag size={10} /> Reduce
                     </button>
-                    <button onClick={() => setShowTradeIn(true)} className="bg-info-bg border-none text-info text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
+                    <button onClick={() => openModal("balloon", car)} className="bg-terra/10 border-none text-terra text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
+                      <CircleDollarSign size={10} /> Balloon
+                    </button>
+                    <button onClick={() => openModal("tradeIn", car)} className="bg-info-bg border-none text-info text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
                       <ArrowLeftRight size={10} /> Trade-in
                     </button>
                     <span className="bg-info-bg text-info text-[10px] font-semibold px-2 py-1 rounded-full">{car.match}% match</span>
                     {liked.includes(car.id) && <span className="bg-success-bg text-success text-[10px] font-semibold px-2 py-1 rounded-full">Liked ✓</span>}
                   </div>
-                  <button className={`w-full py-2.5 rounded-full border-none text-xs font-bold cursor-pointer ${
-                    isCash ? "bg-success text-primary-foreground" : "bg-terra text-primary-foreground"
-                  }`}>
+                  <button
+                    onClick={() => setBankOfferCar(car)}
+                    className="w-full py-2.5 rounded-full border-none text-xs font-bold cursor-pointer bg-terra text-primary-foreground"
+                  >
                     {isCash ? "Make offer" : "Get bank offer"}
                   </button>
                 </div>

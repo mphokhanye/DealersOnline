@@ -21,7 +21,7 @@ export function Profiling({ query, onNav }: ProfilingProps) {
   const questions: Question[] = [
     {
       key: "firsttime",
-      guide: "We'd like to personalise your experience by asking a few quick questions",
+      guide: "",
       q: "Is this your first car?",
       opts: [
         { val: "yes", label: "Yes — my first car", sub: "I'll need some guidance" },
@@ -75,27 +75,28 @@ export function Profiling({ query, onNav }: ProfilingProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      <TopBar title="drive." />
+      <TopBar onBack={() => onNav("landing")} />
       <div className="px-5 pt-6 pb-8 max-w-md mx-auto">
-        {/* AI message */}
-        <div className="bg-dark rounded-2xl px-4 py-3.5 mb-6 flex gap-3 animate-fade-in">
-          <div className="w-8 h-8 rounded-full bg-terra flex items-center justify-center text-sm shrink-0 text-primary-foreground font-heading">
-            d
+        {/* AI message bubble */}
+        {step === 0 ? (
+          <div className="bg-muted rounded-2xl px-4 py-3.5 mb-6 flex gap-3 animate-fade-in">
+            <div className="w-8 h-8 rounded-full bg-terra flex items-center justify-center text-sm shrink-0 text-primary-foreground font-bold">
+              F
+            </div>
+            <p className="text-[13px] text-foreground leading-relaxed m-0">
+              We're analysing: <span className="text-terra font-medium">"{query}"</span>
+            </p>
           </div>
-          <p className="text-[13px] text-soft leading-relaxed m-0">
-            {step === 0 ? (
-              <>
-                We're analysing: <span className="text-terra-light italic">"{query}"</span>
-                <br />
-                <span className="text-primary-foreground/50 text-xs mt-1 block">{current.guide}</span>
-              </>
-            ) : (
-              current.guide
-            )}
-          </p>
-        </div>
+        ) : current.guide ? (
+          <div className="bg-muted rounded-2xl px-4 py-3.5 mb-6 flex gap-3 animate-fade-in">
+            <div className="w-8 h-8 rounded-full bg-terra flex items-center justify-center text-sm shrink-0 text-primary-foreground font-bold">
+              F
+            </div>
+            <p className="text-[13px] text-foreground leading-relaxed m-0">{current.guide}</p>
+          </div>
+        ) : null}
 
-        <h2 className="font-heading text-xl text-foreground mb-4">{current.q}</h2>
+        <h2 className="font-heading text-xl font-bold text-foreground mb-4">{current.q}</h2>
 
         <div className="flex flex-col gap-2.5">
           {current.opts.map(o => (

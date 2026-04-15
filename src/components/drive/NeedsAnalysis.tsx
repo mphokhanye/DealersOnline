@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
-import { Sparkles, Info } from "lucide-react";
 
 interface NeedsAnalysisProps {
   query: string;
@@ -8,28 +7,11 @@ interface NeedsAnalysisProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
 }
 
-interface NeedsQuestion {
-  key: string;
-  q: string;
-  info?: string;
-  infoDetail?: string;
-  opts: string[];
-  showIf?: (a: Record<string, string>) => boolean;
-}
-
 export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
   const [step, setStep] = useState(0);
   const [na, setNa] = useState<Record<string, string>>({});
-  const [showExplain, setShowExplain] = useState(false);
 
-  const financeQs: NeedsQuestion[] = [
-    {
-      key: "balloon",
-      q: "Are you open to a balloon payment?",
-      info: "A balloon payment reduces your monthly but means a lump sum at the end.",
-      infoDetail: "We'll check if this model holds its value well — that's key to whether a balloon makes sense for you.",
-      opts: ["No balloon — full repayment", "Yes, I'm open to it", "Explain this to me first"],
-    },
+  const financeQs = [
     {
       key: "prequal",
       q: "Would you like to pre-qualify now?",
@@ -38,7 +20,7 @@ export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
     },
   ];
 
-  const cashQs: NeedsQuestion[] = [
+  const cashQs = [
     {
       key: "maxspend",
       q: "What's the most you'd like to spend?",
@@ -55,11 +37,6 @@ export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
   const cur = qs[step];
 
   function pick(val: string) {
-    if (val === "Explain this to me first") {
-      setShowExplain(true);
-      return;
-    }
-    setShowExplain(false);
     const newNa = { ...na, [cur.key]: val };
     setNa(newNa);
     if (cur.key === "prequal" && val === "Yes — check my eligibility") {
@@ -73,44 +50,13 @@ export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      <TopBar title="drive." />
+      <TopBar onBack={() => onNav("profiling", { query })} />
       <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
-        <div className="bg-card border border-sand rounded-xl px-4 py-3 mb-5 flex gap-2.5 items-start">
-          <Sparkles size={16} className="text-terra shrink-0 mt-0.5" />
-          <p className="text-[13px] text-mid leading-relaxed m-0">
-            We'd like to personalise your experience. A few quick questions.
-          </p>
-        </div>
-
-        <p className="text-[11px] uppercase tracking-[1.5px] text-soft mb-1 font-semibold">Needs analysis</p>
-        <h2 className="font-heading text-xl text-foreground mb-2">{cur.q}</h2>
+        <h2 className="font-heading text-xl font-bold text-foreground mb-2">{cur.q}</h2>
 
         {cur.info && (
-          <div className="bg-warning-bg border border-warning/30 rounded-lg px-3.5 py-2.5 mb-4">
-            <p className="text-xs text-warning leading-relaxed m-0">💡 {cur.info}</p>
-          </div>
-        )}
-
-        {showExplain && cur.infoDetail && (
-          <div className="bg-info-bg border border-info/30 rounded-lg px-3.5 py-2.5 mb-4 animate-fade-in">
-            <div className="flex gap-2 items-start">
-              <Info size={14} className="text-info shrink-0 mt-0.5" />
-              <p className="text-xs text-info leading-relaxed m-0">{cur.infoDetail}</p>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <button
-                onClick={() => { setShowExplain(false); pick("No balloon — full repayment"); }}
-                className="flex-1 bg-card border border-sand rounded-lg px-3 py-2 text-xs font-semibold text-foreground cursor-pointer font-body hover:border-terra/40 transition-colors"
-              >
-                No balloon
-              </button>
-              <button
-                onClick={() => { setShowExplain(false); pick("Yes, I'm open to it"); }}
-                className="flex-1 bg-terra text-primary-foreground border-none rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer font-body"
-              >
-                I'm open to it
-              </button>
-            </div>
+          <div className="bg-terra/10 border border-terra/20 rounded-lg px-3.5 py-2.5 mb-4">
+            <p className="text-xs text-terra leading-relaxed m-0">💡 {cur.info}</p>
           </div>
         )}
 
