@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
+import { BankOffers } from "./BankOffers";
 import { Fuel, Tag, ArrowLeftRight, Search, FileCheck, CircleDollarSign } from "lucide-react";
 
 interface VehicleSearchProps {

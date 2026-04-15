@@ -54,9 +54,9 @@ export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
       <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
         <h2 className="font-heading text-xl font-bold text-foreground mb-2">{cur.q}</h2>
 
-        {cur.info && (
+        {"info" in cur && cur.info && (
           <div className="bg-terra/10 border border-terra/20 rounded-lg px-3.5 py-2.5 mb-4">
-            <p className="text-xs text-terra leading-relaxed m-0">💡 {cur.info}</p>
+            <p className="text-xs text-terra leading-relaxed m-0">💡 {(cur as any).info}</p>
           </div>
         )}
 
