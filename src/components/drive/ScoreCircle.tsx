@@ -2,7 +2,7 @@ interface ScoreCircleProps {
   label: string;
   value: string;
   colorClass: string;
-  percentage: number; // 0-100, controls how much the ring fills
+  percentage: number;
 }
 
 export function ScoreCircle({ label, value, colorClass, percentage }: ScoreCircleProps) {
@@ -10,11 +10,11 @@ export function ScoreCircle({ label, value, colorClass, percentage }: ScoreCircl
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;
 
-  const colorMap: Record<string, { stroke: string; bg: string; text: string }> = {
-    success: { stroke: "stroke-success", bg: "bg-success-bg", text: "text-success" },
-    warning: { stroke: "stroke-warning", bg: "bg-warning-bg", text: "text-warning" },
-    info: { stroke: "stroke-info", bg: "bg-info-bg", text: "text-info" },
-    danger: { stroke: "stroke-danger", bg: "bg-danger-bg", text: "text-danger" },
+  const colorMap: Record<string, { stroke: string; text: string }> = {
+    success: { stroke: "stroke-success", text: "text-success" },
+    warning: { stroke: "stroke-warning", text: "text-warning" },
+    info: { stroke: "stroke-info", text: "text-info" },
+    danger: { stroke: "stroke-danger", text: "text-danger" },
   };
 
   const c = colorMap[colorClass] || colorMap.info;

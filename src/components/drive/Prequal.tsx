@@ -24,7 +24,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
       <div className="bg-background min-h-screen">
         <TopBar title="Pre-qualification" onBack={() => onNav("needs", { query, answers, na })} />
         <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
-          <p className="text-sm text-mid leading-relaxed mb-5">
+          <p className="text-sm text-soft leading-relaxed mb-5">
             We just need a few details. This is a <strong className="text-foreground">soft check</strong> — it won't affect your credit score.
           </p>
           {([["Name", "name", "Lerato"], ["Surname", "surname", "Dlamini"], ["ID Number", "id", "980101 0001 089"], ["Net Monthly Income (R)", "income", "22 000"]] as const).map(([label, key, placeholder]) => (
@@ -55,50 +55,46 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
 
   if (phase === "loading") {
     return (
-      <div className="bg-dark min-h-screen flex flex-col items-center justify-center px-6">
+      <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
         <div className="max-w-sm w-full text-center">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <svg className="w-full h-full -rotate-90 animate-spin-slow" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" className="stroke-primary-foreground/10" strokeWidth="3" />
-              <circle cx="40" cy="40" r="34" fill="none" className="stroke-terra" strokeWidth="3" strokeLinecap="round" strokeDasharray="214" strokeDashoffset="140" />
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <svg className="w-full h-full -rotate-90 animate-spin-slow" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="26" fill="none" className="stroke-sand" strokeWidth="3" />
+              <circle cx="32" cy="32" r="26" fill="none" className="stroke-terra" strokeWidth="3" strokeLinecap="round" strokeDasharray="163" strokeDashoffset="120" />
             </svg>
           </div>
-          <h2 className="font-heading text-lg text-primary-foreground mb-2">Checking your eligibility</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground mb-2">Checking your eligibility</h2>
           <p className="text-sm text-soft">Running a soft credit check…</p>
         </div>
       </div>
     );
   }
 
-  // Results
   return (
     <div className="bg-background min-h-screen">
       <TopBar title="Your results" />
       <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
-        <h2 className="font-heading text-2xl text-foreground mb-1">Hi, {form.name} 👋</h2>
-        <p className="text-sm text-mid mb-6">Here's your financial snapshot.</p>
+        <h2 className="font-heading text-2xl font-bold text-foreground mb-1">Hi, {form.name} 👋</h2>
+        <p className="text-sm text-soft mb-6">Here's your financial snapshot.</p>
 
-        {/* Score circles - fintech style */}
         <div className="flex justify-between mb-6 px-2">
           <ScoreCircle label="Credit Score" value="Good" colorClass="success" percentage={78} />
           <ScoreCircle label="Debt Level" value="Manageable" colorClass="warning" percentage={45} />
           <ScoreCircle label="Affordability" value="Average" colorClass="info" percentage={60} />
         </div>
 
-        {/* Approval amount */}
-        <div className="bg-dark rounded-2xl p-5 mb-4">
-          <p className="text-[11px] text-soft uppercase tracking-[1.5px] mb-1.5 font-semibold">Estimated Approval Amount</p>
-          <p className="font-heading text-4xl text-terra m-0 mb-1">R285,000</p>
+        <div className="bg-foreground rounded-2xl p-5 mb-4">
+          <p className="text-[11px] text-card/60 uppercase tracking-[1.5px] mb-1.5 font-semibold">Estimated Approval Amount</p>
+          <p className="font-heading text-4xl font-bold text-terra m-0 mb-1">R285,000</p>
           <div className="flex gap-2 items-baseline">
-            <span className="text-2xl text-primary-foreground font-semibold">R5,450</span>
-            <span className="text-sm text-soft">per month · 72 months</span>
+            <span className="text-2xl text-card font-semibold">R5,450</span>
+            <span className="text-sm text-card/60">per month · 72 months</span>
           </div>
-          <div className="mt-3 pt-3 border-t border-primary-foreground/10">
-            <span className="text-sm text-terra-light">🚗 300 cars in your range</span>
+          <div className="mt-3 pt-3 border-t border-card/10">
+            <span className="text-sm text-terra">🚗 300 cars in your range</span>
           </div>
         </div>
 
-        {/* Request callback */}
         <button
           onClick={() => {}}
           className="w-full bg-card border-[1.5px] border-sand rounded-xl px-4 py-3.5 mb-4 flex items-center gap-3 cursor-pointer font-body hover:border-terra/40 transition-colors"
@@ -110,7 +106,6 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
           </div>
         </button>
 
-        {/* Happy with monthly? */}
         <p className="text-[15px] font-semibold text-foreground mb-3">Are you happy with R5,450/month?</p>
         <div className="flex flex-col gap-2 mb-5">
           <button
