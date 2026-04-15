@@ -239,9 +239,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
 
   // If bank offers screen is active
   if (bankOfferCar) {
-    // Dynamic import would be cleaner but let's keep it simple
-    const BankOffersLazy = require("./BankOffers").BankOffers;
-    return <BankOffersLazy car={bankOfferCar} onNav={onNav} onClose={() => setBankOfferCar(null)} />;
+    return <BankOffers car={bankOfferCar} onNav={onNav} onClose={() => setBankOfferCar(null)} />;
   }
 
   return (
