@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from "react";
+import { useState, useCallback } from "react";
 import { Landing } from "@/components/drive/Landing";
 import { LoadingScreen } from "@/components/drive/LoadingScreen";
 import { Profiling } from "@/components/drive/Profiling";

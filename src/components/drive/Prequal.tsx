@@ -13,8 +13,12 @@ interface PrequalProps {
 export function Prequal({ query, answers, na, onNav }: PrequalProps) {
   const [phase, setPhase] = useState<"form" | "loading" | "results">("form");
   const [form, setForm] = useState({ name: "Lerato", surname: "Dlamini", id: "9801010001089", income: "22000" });
+  const [consent, setConsent] = useState({ thirdParty: false, terms: false });
+
+  const canSubmit = consent.thirdParty && consent.terms && form.name && form.id && form.income;
 
   function submit() {
+    if (!canSubmit) return;
     setPhase("loading");
     setTimeout(() => setPhase("results"), 2000);
   }
@@ -38,13 +42,43 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
               />
             </div>
           ))}
+
+          {/* Consent checkboxes */}
+          <div className="mb-4 flex flex-col gap-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consent.thirdParty}
+                onChange={e => setConsent(c => ({ ...c, thirdParty: e.target.checked }))}
+                className="mt-0.5 w-4 h-4 rounded border-sand accent-terra shrink-0"
+              />
+              <span className="text-xs text-soft leading-relaxed">
+                I consent to third-party data sharing for <strong className="text-foreground">credit, affordability, and fraud checks</strong>.
+              </span>
+            </label>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consent.terms}
+                onChange={e => setConsent(c => ({ ...c, terms: e.target.checked }))}
+                className="mt-0.5 w-4 h-4 rounded border-sand accent-terra shrink-0"
+              />
+              <span className="text-xs text-soft leading-relaxed">
+                I accept the <span className="text-terra underline cursor-pointer">Terms and Conditions</span>.
+              </span>
+            </label>
+          </div>
+
           <div className="bg-info-bg rounded-lg px-3.5 py-3 mb-5 flex gap-2 items-start">
             <Lock size={14} className="text-info shrink-0 mt-0.5" />
             <p className="text-xs text-info leading-relaxed m-0">Your data is used only to generate your eligibility result. We never sell your information.</p>
           </div>
           <button
             onClick={submit}
-            className="w-full bg-terra text-primary-foreground border-none rounded-full px-6 py-3.5 text-sm font-semibold cursor-pointer font-body hover:opacity-90 transition-opacity"
+            disabled={!canSubmit}
+            className={`w-full border-none rounded-full px-6 py-3.5 text-sm font-semibold cursor-pointer font-body transition-opacity ${
+              canSubmit ? "bg-terra text-primary-foreground hover:opacity-90" : "bg-sand text-soft cursor-not-allowed"
+            }`}
           >
             Check my eligibility →
           </button>
@@ -78,9 +112,9 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
         <p className="text-sm text-soft mb-6">Here's your financial snapshot.</p>
 
         <div className="flex justify-between mb-6 px-2">
-          <ScoreCircle label="Credit Score" value="Good" colorClass="success" percentage={78} />
-          <ScoreCircle label="Debt Level" value="Manageable" colorClass="warning" percentage={45} />
-          <ScoreCircle label="Affordability" value="Average" colorClass="info" percentage={60} />
+          <ScoreCircle label="Credit Score" value="Good" colorClass="success" percentage={78} animated />
+          <ScoreCircle label="Debt Level" value="Manageable" colorClass="warning" percentage={45} animated />
+          <ScoreCircle label="Affordability" value="Average" colorClass="info" percentage={60} animated />
         </div>
 
         <div className="bg-foreground rounded-2xl p-5 mb-4">

@@ -1,12 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, ArrowRight, Mic, Send, CheckCircle } from "lucide-react";
 
 interface LandingProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
 }
 
+const TYPING_QUERIES = [
+  "What interest rate will the bank give me?",
+  "Best reliable car under R8,000/month",
+  "Alternatives for a Nissan Magnite?",
+  "Which SUV has the lowest fuel cost?",
+  "Can I afford a BMW 3 Series?",
+];
+
+function useTypingAnimation() {
+  const [displayText, setDisplayText] = useState("");
+  const [queryIdx, setQueryIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const active = useRef(true);
+
+  useEffect(() => {
+    active.current = true;
+    const q = TYPING_QUERIES[queryIdx];
+
+    if (!deleting) {
+      if (charIdx < q.length) {
+        const t = setTimeout(() => setCharIdx(c => c + 1), 45);
+        return () => clearTimeout(t);
+      } else {
+        const t = setTimeout(() => setDeleting(true), 2000);
+        return () => clearTimeout(t);
+      }
+    } else {
+      if (charIdx > 0) {
+        const t = setTimeout(() => setCharIdx(c => c - 1), 25);
+        return () => clearTimeout(t);
+      } else {
+        setDeleting(false);
+        setQueryIdx(i => (i + 1) % TYPING_QUERIES.length);
+      }
+    }
+    return () => { active.current = false; };
+  }, [charIdx, deleting, queryIdx]);
+
+  useEffect(() => {
+    setDisplayText(TYPING_QUERIES[queryIdx].slice(0, charIdx));
+  }, [charIdx, queryIdx]);
+
+  return displayText;
+}
+
 export function Landing({ onNav }: LandingProps) {
   const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const typingText = useTypingAnimation();
+
   const ctaBtns = [
     { label: "Search cars", icon: Search },
     { label: "Pre-approval", icon: CheckCircle },
@@ -26,12 +75,10 @@ export function Landing({ onNav }: LandingProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      {/* Hero area with subtle bg */}
       <div className="bg-gradient-to-b from-muted/60 to-background pb-8">
         <div className="px-5 pt-6 max-w-md mx-auto">
           <span className="font-heading text-xl font-bold text-foreground tracking-tight">Find<span className="text-terra">&</span>Drive.</span>
         </div>
-
         <div className="px-5 pt-16 pb-6 max-w-md mx-auto text-center">
           <p className="text-xs uppercase tracking-[3px] text-terra font-semibold mb-3">YOUR PERSONAL CAR ASSISTANT</p>
           <h1 className="font-heading text-[28px] font-bold text-foreground leading-tight mb-2">
@@ -41,15 +88,22 @@ export function Landing({ onNav }: LandingProps) {
       </div>
 
       <div className="px-5 max-w-md mx-auto -mt-2">
-        {/* Search box */}
         <div className="bg-card rounded-full px-5 py-3.5 mb-5 flex gap-3 items-center shadow-md border border-sand">
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && submit(query)}
-            placeholder="Alternatives for a Nissan Magnite?"
-            className="flex-1 border-none outline-none text-sm text-foreground bg-transparent font-body"
-          />
+          <div className="flex-1 relative">
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && submit(query)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              className="w-full border-none outline-none text-sm text-foreground bg-transparent font-body"
+            />
+            {!query && !focused && (
+              <span className="absolute inset-0 flex items-center text-sm text-soft pointer-events-none font-body">
+                {typingText}<span className="inline-block w-[2px] h-4 bg-terra ml-0.5 animate-pulse" />
+              </span>
+            )}
+          </div>
           <Mic size={18} className="text-soft shrink-0 cursor-pointer hover:text-terra transition-colors" />
           <button
             onClick={() => submit(query)}
@@ -59,7 +113,6 @@ export function Landing({ onNav }: LandingProps) {
           </button>
         </div>
 
-        {/* Quick CTAs */}
         <p className="text-sm text-soft text-center mb-3">Or choose where to start:</p>
         <div className="flex gap-2 flex-wrap justify-center mb-8">
           {ctaBtns.map(b => (
@@ -74,7 +127,6 @@ export function Landing({ onNav }: LandingProps) {
           ))}
         </div>
 
-        {/* Example queries */}
         <p className="text-xs text-soft text-center mb-3">People are asking</p>
         <div className="flex flex-col gap-2">
           {examples.map(e => (

@@ -1,14 +1,26 @@
+import { useState, useEffect } from "react";
+
 interface ScoreCircleProps {
   label: string;
   value: string;
   colorClass: string;
   percentage: number;
+  animated?: boolean;
 }
 
-export function ScoreCircle({ label, value, colorClass, percentage }: ScoreCircleProps) {
+export function ScoreCircle({ label, value, colorClass, percentage, animated }: ScoreCircleProps) {
   const radius = 30;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
+  const [currentPct, setCurrentPct] = useState(animated ? 0 : percentage);
+
+  useEffect(() => {
+    if (!animated) return;
+    // Start animation after mount
+    const t = setTimeout(() => setCurrentPct(percentage), 100);
+    return () => clearTimeout(t);
+  }, [animated, percentage]);
+
+  const offset = circumference - (currentPct / 100) * circumference;
 
   const colorMap: Record<string, { stroke: string; text: string }> = {
     success: { stroke: "stroke-success", text: "text-success" },
@@ -32,7 +44,7 @@ export function ScoreCircle({ label, value, colorClass, percentage }: ScoreCircl
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            style={{ transition: "stroke-dashoffset 1.5s ease-out" }}
+            style={{ transition: animated ? "stroke-dashoffset 1.5s ease-out" : undefined }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
