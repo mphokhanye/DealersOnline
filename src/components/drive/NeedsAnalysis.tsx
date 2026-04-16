@@ -15,6 +15,7 @@ export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
     {
       key: "prequal",
       q: "Would you like to pre-qualify now?",
+      why: "Why? This will help us personalise your car search experience.",
       info: "We only need your name, ID number, and net income.",
       opts: ["Yes — check my eligibility", "Not yet — show me cars first"],
     },
@@ -54,7 +55,11 @@ export function NeedsAnalysis({ query, answers, onNav }: NeedsAnalysisProps) {
       <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
         <h2 className="font-heading text-xl font-bold text-foreground mb-2">{cur.q}</h2>
 
-        {"info" in cur && cur.info && (
+        {"why" in cur && (cur as any).why && (
+          <p className="text-sm text-soft mb-3">{(cur as any).why}</p>
+        )}
+
+        {"info" in cur && (cur as any).info && (
           <div className="bg-terra/10 border border-terra/20 rounded-lg px-3.5 py-2.5 mb-4">
             <p className="text-xs text-terra leading-relaxed m-0">💡 {(cur as any).info}</p>
           </div>

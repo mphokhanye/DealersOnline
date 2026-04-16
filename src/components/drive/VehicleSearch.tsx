@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { BankOffers } from "./BankOffers";
-import { Fuel, Tag, ArrowLeftRight, Search, FileCheck, CircleDollarSign } from "lucide-react";
+import { ContractScan } from "./ContractScan";
+import { Fuel, Tag, ArrowLeftRight, Search, FileCheck, CircleDollarSign, ChevronDown, ChevronUp } from "lucide-react";
 
 interface VehicleSearchProps {
   query: string;
@@ -80,14 +81,11 @@ function BalloonModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => vo
   const balloonPercent = 20;
   const balloonAmount = Math.round(price * balloonPercent / 100);
   const financed = price - balloonAmount;
-  // Rough monthly calc: financed over 72 months at ~11.5%
   const r = 0.115 / 12;
   const n = 72;
   const monthlyWithBalloon = Math.round((financed * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
   const monthlyWithout = Math.round((price * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
   const saving = monthlyWithout - monthlyWithBalloon;
-
-  // Value retention signal
   const holdsValue = car.match > 85;
 
   return (
@@ -95,11 +93,9 @@ function BalloonModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => vo
       <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
         <h3 className="font-heading text-xl font-bold text-foreground mb-1">🎈 Balloon payment option</h3>
         <p className="text-[13px] text-soft mb-4">{car.year} {car.make} {car.model}</p>
-
         <div className="bg-terra/10 border border-terra/20 rounded-lg px-3.5 py-2.5 mb-4">
           <p className="text-xs text-terra leading-relaxed m-0">💡 A balloon reduces your monthly but means a lump sum at the end of your term.</p>
         </div>
-
         <div className="bg-muted rounded-xl px-4 py-3 mb-3">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-soft">Without balloon</span>
@@ -110,28 +106,23 @@ function BalloonModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => vo
             <span className="text-sm font-bold text-terra">R{monthlyWithBalloon.toLocaleString()}/mo</span>
           </div>
         </div>
-
         <div className="bg-success-bg rounded-xl px-4 py-3 mb-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-success font-semibold">Monthly saving</span>
             <span className="text-sm text-success font-bold">R{saving.toLocaleString()}/mo</span>
           </div>
         </div>
-
         <div className="bg-muted rounded-xl px-4 py-3 mb-3">
-          <div className="flex justify-between items-center mb-1">
+          <div className="flex justify-between items-center">
             <span className="text-xs text-soft">Balloon due at end of term</span>
             <span className="text-sm font-semibold text-foreground">R{balloonAmount.toLocaleString()}</span>
           </div>
         </div>
-
-        {/* Value retention signal */}
         <div className={`rounded-xl px-4 py-3 mb-4 ${holdsValue ? "bg-success-bg" : "bg-warning-bg"}`}>
           <p className={`text-xs font-semibold m-0 ${holdsValue ? "text-success" : "text-warning"}`}>
             {holdsValue ? "✓ This model holds its value well — balloon is a smart option" : "⚠ This model may depreciate faster — consider carefully"}
           </p>
         </div>
-
         <button onClick={onClose} className="w-full py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
       </div>
     </div>
@@ -193,7 +184,30 @@ function TradeInModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSearchProps) {
+// Pre-qualify gate shown before bank offers if user skipped pre-qual
+function PrequalGate({ onPrequalify, onSkip }: { onPrequalify: () => void; onSkip: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50">
+      <div className="bg-card rounded-t-2xl p-6 w-full max-w-md">
+        <h3 className="font-heading text-xl font-bold text-foreground mb-2">Pre-qualification required</h3>
+        <p className="text-sm text-soft leading-relaxed mb-4">
+          To get bank offers, we need to check your eligibility first. This is a <strong className="text-foreground">soft check</strong> — it won't affect your credit score.
+        </p>
+        <div className="bg-terra/10 border border-terra/20 rounded-lg px-3.5 py-2.5 mb-5">
+          <p className="text-xs text-terra leading-relaxed m-0">💡 Pre-qualifying takes less than 2 minutes and unlocks personalised bank offers for this vehicle.</p>
+        </div>
+        <button onClick={onPrequalify} className="w-full bg-terra text-primary-foreground border-none rounded-full py-3.5 text-sm font-bold cursor-pointer mb-2">
+          Pre-qualify now →
+        </button>
+        <button onClick={onSkip} className="w-full py-3 bg-transparent border-none text-soft text-sm cursor-pointer">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function VehicleSearch({ query, answers, na, prequalified, onNav }: VehicleSearchProps) {
   const [mode, setMode] = useState<"tinder" | "list">("tinder");
   const [cardIdx, setCardIdx] = useState(0);
   const [liked, setLiked] = useState<number[]>([]);
@@ -202,6 +216,10 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
   const [modalCar, setModalCar] = useState<typeof CARS[0] | null>(null);
   const [searchQ, setSearchQ] = useState("");
   const [bankOfferCar, setBankOfferCar] = useState<typeof CARS[0] | null>(null);
+  const [showPrequalGate, setShowPrequalGate] = useState(false);
+  const [pendingBankCar, setPendingBankCar] = useState<typeof CARS[0] | null>(null);
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
+  const [showContractScan, setShowContractScan] = useState(false);
   const name = prequalified ? "Lerato" : "there";
   const isCash = answers?.paymenttype === "cash";
 
@@ -224,6 +242,15 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
     setModalType(type);
   }
 
+  function handleBankOffer(car: typeof CARS[0]) {
+    if (!prequalified) {
+      setPendingBankCar(car);
+      setShowPrequalGate(true);
+    } else {
+      setBankOfferCar(car);
+    }
+  }
+
   function swipe(dir: string) {
     if (dir === "right") setLiked(l => [...l, cur.id]);
     if (cardIdx < CARS.length - 1) setCardIdx(i => i + 1);
@@ -234,10 +261,16 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
     ["Needs", answers?.firsttime === "yes" ? "First car · Finance" : "Upgrade · Finance"],
     ["Budget", prequalified ? "R5,450/pm Pre-Qualified" : "Not yet checked"],
     ["Insurance", "Not checked yet ⚠"],
-    ["Protection", "Finance Contract AI Scan"],
+    ["Protection", "AI Contract Scan"],
   ];
 
-  // If bank offers screen is active
+  if (showContractScan) {
+    return <ContractScan onNav={(screen) => {
+      if (screen === "vehicleSearch") setShowContractScan(false);
+      else onNav(screen);
+    }} />;
+  }
+
   if (bankOfferCar) {
     return <BankOffers car={bankOfferCar} onNav={onNav} onClose={() => setBankOfferCar(null)} />;
   }
@@ -248,6 +281,18 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
       {modalType === "reduce" && modalCar && <ReducePriceModal car={modalCar} onClose={() => setModalType(null)} />}
       {modalType === "balloon" && modalCar && <BalloonModal car={modalCar} onClose={() => setModalType(null)} />}
       {modalType === "tradeIn" && <TradeInModal onClose={() => setModalType(null)} />}
+      {showPrequalGate && (
+        <PrequalGate
+          onPrequalify={() => {
+            setShowPrequalGate(false);
+            onNav("prequal", { query, answers, na });
+          }}
+          onSkip={() => {
+            setShowPrequalGate(false);
+            setPendingBankCar(null);
+          }}
+        />
+      )}
       <TopBar onBack={() => onNav("landing")} />
 
       <div className="px-5 pt-4 max-w-md mx-auto">
@@ -268,7 +313,10 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
             <button className="flex-1 bg-terra text-primary-foreground border-none rounded-full py-2.5 text-xs font-semibold cursor-pointer">
               Get Insurance Quote
             </button>
-            <button className="flex-1 bg-card border border-terra text-terra rounded-full py-2.5 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
+            <button
+              onClick={() => setShowContractScan(true)}
+              className="flex-1 bg-card border border-terra text-terra rounded-full py-2.5 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5"
+            >
               <FileCheck size={12} />
               AI Contract Scan
             </button>
@@ -303,7 +351,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
         <div className="px-5 pb-6 max-w-md mx-auto">
           <p className="text-[11px] text-soft text-center mb-3">{cardIdx + 1} of {CARS.length} · tap to see more</p>
           <div className="bg-card border-[1.5px] border-sand rounded-2xl overflow-hidden mb-4">
-            <div className="bg-gradient-to-br from-muted to-sand h-40 flex items-center justify-center relative text-7xl">
+            <div className="bg-gradient-to-br from-muted to-sand h-48 flex items-center justify-center relative text-7xl">
               🚗
               <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{cur.tag}</div>
               {cur.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
@@ -320,7 +368,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
                 </div>
               </div>
 
-              {/* Action buttons row */}
+              {/* Action buttons */}
               <div className="flex gap-1.5 mb-3.5 flex-wrap">
                 <button onClick={() => openModal("fuel", cur)} className="bg-warning-bg border border-warning/30 rounded-lg px-2.5 py-2 text-[11px] text-warning font-semibold cursor-pointer font-body flex items-center gap-1">
                   <Fuel size={11} /> Fuel
@@ -344,7 +392,7 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
 
               {/* Get bank offer */}
               <button
-                onClick={() => setBankOfferCar(cur)}
+                onClick={() => handleBankOffer(cur)}
                 className="w-full py-3 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer hover:opacity-90 transition-opacity"
               >
                 {isCash ? "Make offer" : "Get bank offer"}
@@ -366,45 +414,61 @@ export function VehicleSearch({ query, answers, prequalified, onNav }: VehicleSe
             ))}
           </div>
 
-          {sorted.map(car => (
-            <div key={car.id} className="bg-card border-[1.5px] border-sand rounded-2xl overflow-hidden mb-2.5">
-              <div className="flex">
-                <div className="w-[90px] bg-gradient-to-br from-muted to-sand flex items-center justify-center text-4xl relative shrink-0">
+          {sorted.map(car => {
+            const isExpanded = expandedCard === car.id;
+            return (
+              <div key={car.id} className="bg-card border-[1.5px] border-sand rounded-2xl overflow-hidden mb-2.5">
+                {/* Large image area */}
+                <div className="bg-gradient-to-br from-muted to-sand h-40 flex items-center justify-center text-6xl relative">
                   🚗
-                  {car.plan && <div className="absolute bottom-1 left-1 bg-success text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-full">Plan ✓</div>}
+                  <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{car.tag}</div>
+                  {car.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Plan ✓</div>}
+                  <span className="absolute bottom-2 right-2 bg-info-bg text-info text-[10px] font-semibold px-2 py-1 rounded-full">{car.match}% match</span>
                 </div>
-                <div className="flex-1 p-3">
+                <div className="p-4">
                   <div className="flex justify-between mb-1">
                     <p className="text-[15px] font-bold text-foreground m-0">{car.year} {car.make} {car.model}</p>
                     <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
                   </div>
-                  <p className="text-xs text-soft m-0 mb-2">{car.mileage} · {car.accidents === 0 ? "✓ No accidents" : "⚠ 1 accident"}</p>
-                  <div className="flex gap-1.5 flex-wrap mb-2.5">
-                    <button onClick={() => openModal("fuel", car)} className="bg-warning-bg border-none text-warning text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
-                      <Fuel size={10} /> Fuel
+                  <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.accidents === 0 ? "✓ No accidents" : "⚠ 1 accident"}{!isCash ? ` · ${car.price}` : ""}</p>
+
+                  {/* View more toggle */}
+                  {isExpanded && (
+                    <div className="flex gap-1.5 flex-wrap mb-3 animate-fade-in">
+                      <button onClick={() => openModal("fuel", car)} className="bg-warning-bg border-none text-warning text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                        <Fuel size={10} /> Fuel cost
+                      </button>
+                      <button onClick={() => openModal("reduce", car)} className="bg-success-bg border-none text-success text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                        <Tag size={10} /> Reduce price
+                      </button>
+                      <button onClick={() => openModal("balloon", car)} className="bg-terra/10 border-none text-terra text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                        <CircleDollarSign size={10} /> Balloon
+                      </button>
+                      <button onClick={() => openModal("tradeIn", car)} className="bg-info-bg border-none text-info text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                        <ArrowLeftRight size={10} /> Trade-in
+                      </button>
+                      {liked.includes(car.id) && <span className="bg-success-bg text-success text-[10px] font-semibold px-2 py-1.5 rounded-full">Liked ✓</span>}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setExpandedCard(isExpanded ? null : car.id)}
+                      className="flex-1 py-2.5 rounded-full border-[1.5px] border-sand text-xs font-semibold cursor-pointer bg-card text-soft flex items-center justify-center gap-1"
+                    >
+                      {isExpanded ? <><ChevronUp size={12} /> Less</> : <><ChevronDown size={12} /> View more</>}
                     </button>
-                    <button onClick={() => openModal("reduce", car)} className="bg-success-bg border-none text-success text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
-                      <Tag size={10} /> Reduce
+                    <button
+                      onClick={() => handleBankOffer(car)}
+                      className="flex-1 py-2.5 rounded-full border-none text-xs font-bold cursor-pointer bg-terra text-primary-foreground"
+                    >
+                      {isCash ? "Make offer" : "Get bank offer"}
                     </button>
-                    <button onClick={() => openModal("balloon", car)} className="bg-terra/10 border-none text-terra text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
-                      <CircleDollarSign size={10} /> Balloon
-                    </button>
-                    <button onClick={() => openModal("tradeIn", car)} className="bg-info-bg border-none text-info text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer flex items-center gap-1">
-                      <ArrowLeftRight size={10} /> Trade-in
-                    </button>
-                    <span className="bg-info-bg text-info text-[10px] font-semibold px-2 py-1 rounded-full">{car.match}% match</span>
-                    {liked.includes(car.id) && <span className="bg-success-bg text-success text-[10px] font-semibold px-2 py-1 rounded-full">Liked ✓</span>}
                   </div>
-                  <button
-                    onClick={() => setBankOfferCar(car)}
-                    className="w-full py-2.5 rounded-full border-none text-xs font-bold cursor-pointer bg-terra text-primary-foreground"
-                  >
-                    {isCash ? "Make offer" : "Get bank offer"}
-                  </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
