@@ -208,13 +208,16 @@ function PrequalGate({ onPrequalify, onSkip }: { onPrequalify: () => void; onSki
 }
 
 export function VehicleSearch({ query, answers, na, prequalified, onNav }: VehicleSearchProps) {
-  const [mode, setMode] = useState<"tinder" | "list">("tinder");
+  // Detect if landing query looks like a make/model search
+  const knownMakes = ["toyota", "honda", "mazda", "hyundai", "vw", "volkswagen", "bmw", "audi", "ford", "kia", "nissan", "mercedes", "renault", "suzuki"];
+  const initialIsVehicle = !!query && knownMakes.some(m => query.toLowerCase().includes(m));
+  const [mode, setMode] = useState<"tinder" | "list">(initialIsVehicle ? "list" : "tinder");
   const [cardIdx, setCardIdx] = useState(0);
   const [liked, setLiked] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState("match");
   const [modalType, setModalType] = useState<ModalType>(null);
   const [modalCar, setModalCar] = useState<typeof CARS[0] | null>(null);
-  const [searchQ, setSearchQ] = useState("");
+  const [searchQ, setSearchQ] = useState(initialIsVehicle ? query : "");
   const [bankOfferCar, setBankOfferCar] = useState<typeof CARS[0] | null>(null);
   const [showPrequalGate, setShowPrequalGate] = useState(false);
   const [pendingBankCar, setPendingBankCar] = useState<typeof CARS[0] | null>(null);
@@ -229,7 +232,24 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
     "A modern car with the latest technology",
   ];
 
-  let sorted = [...CARS];
+  // Filter cars by search query (make/model match)
+  const q = searchQ.trim().toLowerCase();
+  let filtered = q
+    ? CARS.filter(c => `${c.make} ${c.model}`.toLowerCase().includes(q) || c.make.toLowerCase().includes(q) || c.model.toLowerCase().includes(q))
+    : [...CARS];
+
+  // If search yielded nothing but looks like a vehicle name, synthesise a result card
+  if (q && filtered.length === 0 && knownMakes.some(m => q.includes(m))) {
+    const parts = searchQ.trim().split(/\s+/);
+    const make = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : "Vehicle";
+    const model = parts.slice(1).join(" ") || "Model";
+    filtered = [{
+      id: 999, make, model, year: 2021, mileage: "45,000 km", price: "R229,000", monthly: "R5,050/mo",
+      servicePlan: true, transmission: "Auto", fuelType: "Petrol", fuel: 6.9, match: 88, tag: "Your search",
+    }];
+  }
+
+  let sorted = filtered;
   if (sortBy === "instalment") sorted.sort((a, b) => parseInt(a.monthly) - parseInt(b.monthly));
   if (sortBy === "fuel") sorted.sort((a, b) => a.fuel - b.fuel);
   if (sortBy === "match") sorted.sort((a, b) => b.match - a.match);
