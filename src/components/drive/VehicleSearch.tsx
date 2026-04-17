@@ -354,13 +354,13 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
             <div className="bg-gradient-to-br from-muted to-sand h-48 flex items-center justify-center relative text-7xl">
               🚗
               <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{cur.tag}</div>
-              {cur.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
+              {cur.servicePlan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
             </div>
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h3 className="font-heading text-xl font-bold text-foreground m-0 mb-0.5">{cur.year} {cur.make} {cur.model}</h3>
-                  <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.accidents === 0 ? "No accidents" : "1 minor accident"}</p>
+                  <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.transmission} · {cur.fuelType}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold text-terra m-0 mb-0.5">{isCash ? cur.price : cur.monthly}</p>
