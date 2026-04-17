@@ -422,7 +422,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                 <div className="bg-gradient-to-br from-muted to-sand h-40 flex items-center justify-center text-6xl relative">
                   🚗
                   <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{car.tag}</div>
-                  {car.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Plan ✓</div>}
+                  {car.servicePlan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
                   <span className="absolute bottom-2 right-2 bg-info-bg text-info text-[10px] font-semibold px-2 py-1 rounded-full">{car.match}% match</span>
                 </div>
                 <div className="p-4">
@@ -430,7 +430,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                     <p className="text-[15px] font-bold text-foreground m-0">{car.year} {car.make} {car.model}</p>
                     <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
                   </div>
-                  <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.accidents === 0 ? "✓ No accidents" : "⚠ 1 accident"}{!isCash ? ` · ${car.price}` : ""}</p>
+                  <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.transmission} · {car.fuelType}{!isCash ? ` · ${car.price}` : ""}</p>
 
                   {/* View more toggle */}
                   {isExpanded && (
