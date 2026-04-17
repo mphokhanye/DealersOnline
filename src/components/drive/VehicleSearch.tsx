@@ -14,11 +14,11 @@ interface VehicleSearchProps {
 }
 
 const CARS = [
-  { id: 1, make: "Toyota", model: "Corolla", year: 2020, mileage: "62,000 km", price: "R219,900", monthly: "R4,890/mo", plan: true, accidents: 0, fuel: 6.8, match: 96, tag: "Best match" },
-  { id: 2, make: "Honda", model: "Civic", year: 2019, mileage: "54,000 km", price: "R198,500", monthly: "R4,420/mo", plan: true, accidents: 0, fuel: 7.1, match: 91, tag: "Fuel saver" },
-  { id: 3, make: "Mazda", model: "3", year: 2021, mileage: "38,000 km", price: "R249,000", monthly: "R5,380/mo", plan: false, accidents: 0, fuel: 6.5, match: 87, tag: "Premium feel" },
-  { id: 4, make: "Hyundai", model: "Elantra", year: 2020, mileage: "71,000 km", price: "R179,900", monthly: "R4,010/mo", plan: true, accidents: 1, fuel: 7.4, match: 83, tag: "Best price" },
-  { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/mo", plan: true, accidents: 0, fuel: 6.2, match: 79, tag: "Low mileage" },
+  { id: 1, make: "Toyota", model: "Corolla", year: 2020, mileage: "62,000 km", price: "R219,900", monthly: "R4,890/mo", servicePlan: true, transmission: "Auto", fuelType: "Petrol", fuel: 6.8, match: 96, tag: "Best match" },
+  { id: 2, make: "Honda", model: "Civic", year: 2019, mileage: "54,000 km", price: "R198,500", monthly: "R4,420/mo", servicePlan: true, transmission: "Man", fuelType: "Petrol", fuel: 7.1, match: 91, tag: "Fuel saver" },
+  { id: 3, make: "Mazda", model: "3", year: 2021, mileage: "38,000 km", price: "R249,000", monthly: "R5,380/mo", servicePlan: false, transmission: "Auto", fuelType: "Petrol", fuel: 6.5, match: 87, tag: "Premium feel" },
+  { id: 4, make: "Hyundai", model: "Elantra", year: 2020, mileage: "71,000 km", price: "R179,900", monthly: "R4,010/mo", servicePlan: true, transmission: "Man", fuelType: "Diesel", fuel: 7.4, match: 83, tag: "Best price" },
+  { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/mo", servicePlan: true, transmission: "Auto", fuelType: "Diesel", fuel: 6.2, match: 79, tag: "Low mileage" },
 ];
 
 type ModalType = "fuel" | "reduce" | "tradeIn" | "balloon" | null;
@@ -208,13 +208,16 @@ function PrequalGate({ onPrequalify, onSkip }: { onPrequalify: () => void; onSki
 }
 
 export function VehicleSearch({ query, answers, na, prequalified, onNav }: VehicleSearchProps) {
-  const [mode, setMode] = useState<"tinder" | "list">("tinder");
+  // Detect if landing query looks like a make/model search
+  const knownMakes = ["toyota", "honda", "mazda", "hyundai", "vw", "volkswagen", "bmw", "audi", "ford", "kia", "nissan", "mercedes", "renault", "suzuki"];
+  const initialIsVehicle = !!query && knownMakes.some(m => query.toLowerCase().includes(m));
+  const [mode, setMode] = useState<"tinder" | "list">(initialIsVehicle ? "list" : "tinder");
   const [cardIdx, setCardIdx] = useState(0);
   const [liked, setLiked] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState("match");
   const [modalType, setModalType] = useState<ModalType>(null);
   const [modalCar, setModalCar] = useState<typeof CARS[0] | null>(null);
-  const [searchQ, setSearchQ] = useState("");
+  const [searchQ, setSearchQ] = useState(initialIsVehicle ? query : "");
   const [bankOfferCar, setBankOfferCar] = useState<typeof CARS[0] | null>(null);
   const [showPrequalGate, setShowPrequalGate] = useState(false);
   const [pendingBankCar, setPendingBankCar] = useState<typeof CARS[0] | null>(null);
@@ -229,7 +232,24 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
     "A modern car with the latest technology",
   ];
 
-  let sorted = [...CARS];
+  // Filter cars by search query (make/model match)
+  const q = searchQ.trim().toLowerCase();
+  let filtered = q
+    ? CARS.filter(c => `${c.make} ${c.model}`.toLowerCase().includes(q) || c.make.toLowerCase().includes(q) || c.model.toLowerCase().includes(q))
+    : [...CARS];
+
+  // If search yielded nothing but looks like a vehicle name, synthesise a result card
+  if (q && filtered.length === 0 && knownMakes.some(m => q.includes(m))) {
+    const parts = searchQ.trim().split(/\s+/);
+    const make = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : "Vehicle";
+    const model = parts.slice(1).join(" ") || "Model";
+    filtered = [{
+      id: 999, make, model, year: 2021, mileage: "45,000 km", price: "R229,000", monthly: "R5,050/mo",
+      servicePlan: true, transmission: "Auto", fuelType: "Petrol", fuel: 6.9, match: 88, tag: "Your search",
+    }];
+  }
+
+  let sorted = filtered;
   if (sortBy === "instalment") sorted.sort((a, b) => parseInt(a.monthly) - parseInt(b.monthly));
   if (sortBy === "fuel") sorted.sort((a, b) => a.fuel - b.fuel);
   if (sortBy === "match") sorted.sort((a, b) => b.match - a.match);
@@ -326,7 +346,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
         {/* Search */}
         <div className="bg-card border-[1.5px] border-sand rounded-2xl px-3.5 py-3 flex gap-2 mb-2.5 items-center">
           <Search size={14} className="text-muted-foreground shrink-0" />
-          <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Tell us what you're looking for" className="flex-1 border-none outline-none text-[13px] text-foreground bg-transparent font-body" />
+          <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Add filters or search again" className="flex-1 border-none outline-none text-[13px] text-foreground bg-transparent font-body" />
         </div>
         <div className="flex flex-col gap-1 mb-4">
           {suggestions.map(s => (
@@ -354,13 +374,13 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
             <div className="bg-gradient-to-br from-muted to-sand h-48 flex items-center justify-center relative text-7xl">
               🚗
               <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{cur.tag}</div>
-              {cur.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
+              {cur.servicePlan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
             </div>
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h3 className="font-heading text-xl font-bold text-foreground m-0 mb-0.5">{cur.year} {cur.make} {cur.model}</h3>
-                  <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.accidents === 0 ? "No accidents" : "1 minor accident"}</p>
+                  <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.transmission} · {cur.fuelType}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold text-terra m-0 mb-0.5">{isCash ? cur.price : cur.monthly}</p>
@@ -422,7 +442,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                 <div className="bg-gradient-to-br from-muted to-sand h-40 flex items-center justify-center text-6xl relative">
                   🚗
                   <div className="absolute top-3 left-3 bg-terra text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">{car.tag}</div>
-                  {car.plan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Plan ✓</div>}
+                  {car.servicePlan && <div className="absolute top-3 right-3 bg-success text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">Service plan ✓</div>}
                   <span className="absolute bottom-2 right-2 bg-info-bg text-info text-[10px] font-semibold px-2 py-1 rounded-full">{car.match}% match</span>
                 </div>
                 <div className="p-4">
@@ -430,7 +450,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                     <p className="text-[15px] font-bold text-foreground m-0">{car.year} {car.make} {car.model}</p>
                     <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
                   </div>
-                  <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.accidents === 0 ? "✓ No accidents" : "⚠ 1 accident"}{!isCash ? ` · ${car.price}` : ""}</p>
+                  <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.transmission} · {car.fuelType}{!isCash ? ` · ${car.price}` : ""}</p>
 
                   {/* View more toggle */}
                   {isExpanded && (
