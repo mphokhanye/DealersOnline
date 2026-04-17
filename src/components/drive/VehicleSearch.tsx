@@ -14,11 +14,11 @@ interface VehicleSearchProps {
 }
 
 const CARS = [
-  { id: 1, make: "Toyota", model: "Corolla", year: 2020, mileage: "62,000 km", price: "R219,900", monthly: "R4,890/mo", servicePlan: true, transmission: "Auto", fuelType: "Petrol", fuel: 6.8, match: 96, tag: "Best match" },
-  { id: 2, make: "Honda", model: "Civic", year: 2019, mileage: "54,000 km", price: "R198,500", monthly: "R4,420/mo", servicePlan: true, transmission: "Man", fuelType: "Petrol", fuel: 7.1, match: 91, tag: "Fuel saver" },
-  { id: 3, make: "Mazda", model: "3", year: 2021, mileage: "38,000 km", price: "R249,000", monthly: "R5,380/mo", servicePlan: false, transmission: "Auto", fuelType: "Petrol", fuel: 6.5, match: 87, tag: "Premium feel" },
-  { id: 4, make: "Hyundai", model: "Elantra", year: 2020, mileage: "71,000 km", price: "R179,900", monthly: "R4,010/mo", servicePlan: true, transmission: "Man", fuelType: "Diesel", fuel: 7.4, match: 83, tag: "Best price" },
-  { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/mo", servicePlan: true, transmission: "Auto", fuelType: "Diesel", fuel: 6.2, match: 79, tag: "Low mileage" },
+  { id: 1, make: "Toyota", model: "Corolla", year: 2020, mileage: "62,000 km", price: "R219,900", monthly: "R4,890/mo", servicePlan: true, transmission: "Automatic", fuelType: "Petrol", fuel: 6.8, match: 96, tag: "Best match" },
+  { id: 2, make: "Honda", model: "Civic", year: 2019, mileage: "54,000 km", price: "R198,500", monthly: "R4,420/mo", servicePlan: true, transmission: "Manual", fuelType: "Petrol", fuel: 7.1, match: 91, tag: "Fuel saver" },
+  { id: 3, make: "Mazda", model: "3", year: 2021, mileage: "38,000 km", price: "R249,000", monthly: "R5,380/mo", servicePlan: false, transmission: "Automatic", fuelType: "Petrol", fuel: 6.5, match: 87, tag: "Premium feel" },
+  { id: 4, make: "Hyundai", model: "Elantra", year: 2020, mileage: "71,000 km", price: "R179,900", monthly: "R4,010/mo", servicePlan: true, transmission: "Manual", fuelType: "Diesel", fuel: 7.4, match: 83, tag: "Best price" },
+  { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/mo", servicePlan: true, transmission: "Automatic", fuelType: "Diesel", fuel: 6.2, match: 79, tag: "Low mileage" },
 ];
 
 type ModalType = "fuel" | "reduce" | "tradeIn" | "balloon" | null;
@@ -245,7 +245,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
     const model = parts.slice(1).join(" ") || "Model";
     filtered = [{
       id: 999, make, model, year: 2021, mileage: "45,000 km", price: "R229,000", monthly: "R5,050/mo",
-      servicePlan: true, transmission: "Auto", fuelType: "Petrol", fuel: 6.9, match: 88, tag: "Your search",
+      servicePlan: true, transmission: "Automatic", fuelType: "Petrol", fuel: 6.9, match: 88, tag: "Your search",
     }];
   }
 
