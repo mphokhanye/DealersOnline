@@ -346,7 +346,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
         {/* Search */}
         <div className="bg-card border-[1.5px] border-sand rounded-2xl px-3.5 py-3 flex gap-2 mb-2.5 items-center">
           <Search size={14} className="text-muted-foreground shrink-0" />
-          <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Tell us what you're looking for" className="flex-1 border-none outline-none text-[13px] text-foreground bg-transparent font-body" />
+          <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Add filters or search again" className="flex-1 border-none outline-none text-[13px] text-foreground bg-transparent font-body" />
         </div>
         <div className="flex flex-col gap-1 mb-4">
           {suggestions.map(s => (
