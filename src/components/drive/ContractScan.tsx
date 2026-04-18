@@ -118,8 +118,9 @@ const levelStyles = {
   green: { bg: "bg-success-bg", border: "border-success/40", text: "text-success", dot: "bg-success-bg" },
 };
 
-function ScanRow({ item, expanded, onToggle }: { item: typeof SCAN_RESULTS[0]; expanded: boolean; onToggle: () => void }) {
+function ScanRow({ item, expanded, onToggle }: { item: ScanItem; expanded: boolean; onToggle: () => void }) {
   const s = levelStyles[item.level];
+  const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
   return (
     <div className={`rounded-2xl border-[1.5px] overflow-hidden mb-2.5 bg-card transition-colors ${expanded ? s.border : "border-sand"}`}>
       <button onClick={onToggle} className="w-full flex gap-3 p-4 cursor-pointer items-start bg-transparent border-none text-left font-body">
@@ -138,7 +139,45 @@ function ScanRow({ item, expanded, onToggle }: { item: typeof SCAN_RESULTS[0]; e
           </div>
           <p className="text-xs text-soft leading-relaxed mb-3">{item.detail}</p>
           <span className="text-[10px] text-soft bg-muted rounded-md px-2 py-1 font-semibold inline-block mb-3">Found in: {item.clause}</span>
-          {item.level !== "green" && (
+
+          {item.question && (
+            <div className="bg-muted/40 border border-sand rounded-xl px-3.5 py-3 mb-3">
+              <p className="text-[13px] font-semibold text-foreground m-0 mb-2.5">{item.question.prompt}</p>
+              {answer === null ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setAnswer("yes")}
+                    className="flex-1 py-2 rounded-full bg-card border-[1.5px] border-sand text-foreground text-xs font-semibold cursor-pointer hover:border-terra/40 transition-colors"
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => setAnswer("no")}
+                    className="flex-1 py-2 rounded-full bg-card border-[1.5px] border-sand text-foreground text-xs font-semibold cursor-pointer hover:border-terra/40 transition-colors"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <div className={`${answer === "yes" ? "bg-success-bg border-success/30" : "bg-info-bg border-info/30"} border rounded-lg px-3 py-2.5`}>
+                  <p className="text-[10px] font-bold uppercase tracking-[1px] mb-1 text-foreground/70">
+                    {answer === "yes" ? "You said yes" : "You said no"}
+                  </p>
+                  <p className="text-[13px] text-foreground leading-relaxed m-0">
+                    {answer === "yes" ? item.question.yesResponse : item.question.noResponse}
+                  </p>
+                  <button
+                    onClick={() => setAnswer(null)}
+                    className="text-[11px] text-soft underline cursor-pointer bg-transparent border-none p-0 mt-2"
+                  >
+                    Change my answer
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {item.level !== "green" && !item.question && (
             <div className="bg-foreground rounded-xl px-3.5 py-3">
               <p className="text-[10px] font-bold text-terra-light uppercase tracking-[1px] mb-1.5">What to do</p>
               <p className="text-[13px] text-card/70 leading-relaxed m-0">{item.action}</p>
