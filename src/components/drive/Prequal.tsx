@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { ScoreCircle } from "./ScoreCircle";
 import { Lock, Phone } from "lucide-react";
+import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
 
 interface PrequalProps {
   query: string;
