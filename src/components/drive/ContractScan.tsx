@@ -349,9 +349,9 @@ export function ContractScan({ onNav }: ContractScanProps) {
             </button>
           </div>
 
-          <div className="bg-warning-bg border border-warning/30 rounded-xl px-3.5 py-3 mt-5">
-            <p className="text-[13px] text-warning leading-relaxed m-0 font-medium">
-              ⏱ <strong>Don't sign under pressure.</strong> Any dealer who says "this offer expires today" is using a sales tactic. Legitimate deals are available tomorrow too.
+          <div className="bg-info-bg border border-info/30 rounded-xl px-3.5 py-3 mt-5">
+            <p className="text-[13px] text-info leading-relaxed m-0 font-medium">
+              💡 <strong>Take your time.</strong> A good deal is still a good deal tomorrow. Use these answers to walk into the dealership feeling confident and in control.
             </p>
           </div>
         </div>
