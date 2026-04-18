@@ -307,7 +307,7 @@ export function ContractScan({ onNav }: ContractScanProps) {
           <div className="bg-info-bg border-[1.5px] border-info/40 rounded-2xl p-4 mb-5">
             <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-1.5">Scan complete · You're informed</p>
             <h2 className="font-heading text-xl font-bold text-foreground leading-tight mb-2">Here's what we found in your contract</h2>
-            <p className="text-[13px] text-soft leading-relaxed m-0">A few items are worth a quick conversation with your dealer. Tap each one to see what it means and answer a quick question — we'll guide you from there.</p>
+            <p className="text-[13px] text-soft leading-relaxed m-0">A few items are worth a quick conversation with us. Tap each one to see what it means and answer a quick question — we'll guide you from there.</p>
           </div>
 
           {/* Score summary */}
@@ -351,7 +351,7 @@ export function ContractScan({ onNav }: ContractScanProps) {
 
           <div className="bg-info-bg border border-info/30 rounded-xl px-3.5 py-3 mt-5">
             <p className="text-[13px] text-info leading-relaxed m-0 font-medium">
-              💡 <strong>Take your time.</strong> A good deal is still a good deal tomorrow. Use these answers to walk into the dealership feeling confident and in control.
+              💡 <strong>Take your time.</strong> A good deal is still a good deal tomorrow. Use these answers to walk into our showroom feeling confident and in control.
             </p>
           </div>
         </div>
