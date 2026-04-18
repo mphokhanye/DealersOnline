@@ -1,6 +1,7 @@
 import { useState, useRef, TouchEvent } from "react";
 import { TopBar } from "./TopBar";
 import { ChevronLeft, ChevronRight, CheckCircle, Shield } from "lucide-react";
+import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
 
 interface BankOffersProps {
   car: { make: string; model: string; year: number; price: string };
@@ -198,6 +199,7 @@ export function BankOffers({ car, onNav, onClose }: BankOffersProps) {
         {/* Offer count */}
         <p className="text-xs text-soft text-center mt-4">{current + 1} of {OFFERS.length} offers</p>
       </div>
+      <HelpWidget context="offers" topics={HELP_CONTENT.offers} />
     </div>
   );
 }

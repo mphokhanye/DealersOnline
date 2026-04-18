@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { ScoreCircle } from "./ScoreCircle";
 import { Lock, Phone } from "lucide-react";
+import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
 
 interface PrequalProps {
   query: string;
@@ -167,6 +168,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
           </div>
         </div>
       </div>
+      <HelpWidget context="prequal" topics={HELP_CONTENT.prequal} />
     </div>
   );
 }
