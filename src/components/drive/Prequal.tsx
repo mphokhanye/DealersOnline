@@ -168,6 +168,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
           </div>
         </div>
       </div>
+      <HelpWidget context="prequal" topics={HELP_CONTENT.prequal} />
     </div>
   );
 }
