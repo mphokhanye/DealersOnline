@@ -1,6 +1,7 @@
 import { useState, useRef, TouchEvent } from "react";
 import { TopBar } from "./TopBar";
 import { ChevronLeft, ChevronRight, CheckCircle, Shield } from "lucide-react";
+import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
 
 interface BankOffersProps {
   car: { make: string; model: string; year: number; price: string };
