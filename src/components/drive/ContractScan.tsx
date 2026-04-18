@@ -6,50 +6,87 @@ interface ContractScanProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
 }
 
-const SCAN_RESULTS = [
+type ScanItem = {
+  id: string;
+  level: "red" | "amber" | "green";
+  icon: string;
+  title: string;
+  plain: string;
+  detail: string;
+  clause: string;
+  action: string;
+  verdict: string;
+  question?: {
+    prompt: string;
+    yesResponse: string;
+    noResponse: string;
+  };
+};
+
+const SCAN_RESULTS: ScanItem[] = [
   {
     id: "balloon",
-    level: "red" as const,
-    icon: "🚨",
-    title: "Balloon payment detected",
-    plain: "At the end of 72 months you will owe a single lump sum of R42,000. This amount is NOT included in your monthly payment of R5,450.",
-    detail: "The contract refers to this as a 'residual value' of 15.2% of the purchase price. Many buyers don't realise this exists until the final payment is due.",
+    level: "red",
+    icon: "🎈",
+    title: "Balloon payment included",
+    plain: "At the end of 72 months there is a single lump sum of R42,000 owing. This amount is separate from your monthly payment of R5,450.",
+    detail: "The contract refers to this as a 'residual value' of 15.2% of the purchase price. Some buyers choose this to keep monthlies low — others prefer to own the car outright at the end.",
     clause: "Clause 8.3 — Residual Value",
-    action: "Ask the dealer to remove the balloon and recalculate. Your monthly will increase slightly but you'll own the car outright at the end.",
-    verdict: "High risk — review before signing",
+    action: "If the balloon was your choice, you're all set. If not, ask the dealer to remove it and recalculate — your monthly will go up slightly but you'll own the car outright at the end.",
+    verdict: "Good to confirm with your dealer",
+    question: {
+      prompt: "Did you request a balloon payment in your deal?",
+      yesResponse: "Perfect — you're in control. Balloon payments are a valid choice when you want lower monthlies and plan to refinance, trade in or settle the lump sum at the end.",
+      noResponse: "No problem. Ask the dealer: \"Please remove the balloon and recalculate my instalment without it.\" You'll own the car outright at the end with no surprise lump sum.",
+    },
   },
   {
     id: "rate",
-    level: "amber" as const,
-    icon: "⚠️",
-    title: "Interest rate is above prime",
-    plain: "Your interest rate is 14.25%. The current prime lending rate is 11.75%. You are being charged 2.5% above prime.",
-    detail: "This is within legal limits but on the higher end for someone with your credit profile. You may be able to negotiate this down.",
+    level: "amber",
+    icon: "📈",
+    title: "Interest rate vs your credit profile",
+    plain: "Your interest rate is 14.25%. The current prime lending rate is 11.75%, so you're at prime + 2.5%.",
+    detail: "Based on your credit profile, you may qualify for a better rate. Banks often have room to move, especially when you ask.",
     clause: "Clause 4.1 — Finance Charges",
-    action: "Ask the dealer: 'Can you match prime + 1.5%?' If they say no, take your pre-approval to a different dealer.",
-    verdict: "Worth negotiating before signing",
+    action: "You have a strong credit score. If you'd like your rate reviewed for a better offer, ask the dealer or tap Yes below to request a review.",
+    verdict: "You may qualify for a better rate",
+    question: {
+      prompt: "Would you like us to request a rate review for you?",
+      yesResponse: "Great — we'll flag this with the dealer's F&I manager. A simple script: \"My credit profile qualifies for a better rate. Can you match prime + 1.5%?\" Most dealers will revisit the offer.",
+      noResponse: "No problem. If you change your mind, you can always ask the dealer directly — it costs nothing to ask and you're well within your rights.",
+    },
   },
   {
     id: "totalcost",
-    level: "amber" as const,
+    level: "amber",
     icon: "💰",
     title: "Total cost of credit",
-    plain: "The car costs R219,900. By the time you finish paying, you will have paid R387,240 in total — R167,340 in interest alone.",
-    detail: "Over 72 months at 14.25%, your interest cost nearly equals the deposit on a small home.",
+    plain: "The car costs R219,900. Over the full 72 months you'll pay R387,240 in total — R167,340 of that is interest.",
+    detail: "This is normal for a 6-year finance deal, but it's useful to see the full picture so you can decide if a shorter term or larger deposit might suit you better.",
     clause: "Clause 5 — Total Amount Payable",
-    action: "Consider a shorter term (60 months) or a larger deposit to reduce total interest paid.",
-    verdict: "Informational — important to know",
+    action: "If you'd like to see what a 60-month term or a bigger deposit would look like, the dealer can quickly recalculate for you.",
+    verdict: "Good to know — your choice",
+    question: {
+      prompt: "Would you like to see alternative term options?",
+      yesResponse: "Smart move. Ask: \"Can you show me the same deal over 60 months, and again with R20,000 more deposit?\" You'll see exactly how much interest you'd save.",
+      noResponse: "All good — the current term works for many buyers. Lower monthlies often matter more than total interest, especially early in your career.",
+    },
   },
   {
     id: "addons",
-    level: "amber" as const,
+    level: "amber",
     icon: "📦",
     title: "3 add-on products bundled in",
-    plain: "Your monthly payment includes R890/month in products you may not have specifically agreed to: Credit Life (R420/mo), Extended Warranty (R290/mo), Tyre & Rim (R180/mo).",
-    detail: "These products are optional by law. Over 72 months these add-ons cost R64,080 — nearly 30% of the car's cash price.",
+    plain: "Your monthly includes R890/month in optional products: Credit Life (R420/mo), Extended Warranty (R290/mo), Tyre & Rim (R180/mo).",
+    detail: "These are optional by law and some buyers value the peace of mind. Over 72 months they add R64,080 to the deal, so it's worth confirming each one is something you actually want.",
     clause: "Schedule B — Optional Products",
-    action: "Ask the F&I manager to remove each product one at a time and explain what you're losing.",
-    verdict: "Review each product individually",
+    action: "If you chose these intentionally, you're set. If you'd like to review them, the dealer can walk through each one and explain what you'd be giving up by removing it.",
+    verdict: "Confirm each product is what you want",
+    question: {
+      prompt: "Did you knowingly choose all three add-on products?",
+      yesResponse: "Perfect — these can be valuable. Credit Life settles the loan if something happens to you, and a warranty can save you on repairs. You're making an informed choice.",
+      noResponse: "Easy fix. Ask: \"Please walk me through each add-on and remove any I didn't specifically request.\" You're allowed to remove them individually — it's your right under the NCA.",
+    },
   },
   {
     id: "fees",
@@ -81,8 +118,9 @@ const levelStyles = {
   green: { bg: "bg-success-bg", border: "border-success/40", text: "text-success", dot: "bg-success-bg" },
 };
 
-function ScanRow({ item, expanded, onToggle }: { item: typeof SCAN_RESULTS[0]; expanded: boolean; onToggle: () => void }) {
+function ScanRow({ item, expanded, onToggle }: { item: ScanItem; expanded: boolean; onToggle: () => void }) {
   const s = levelStyles[item.level];
+  const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
   return (
     <div className={`rounded-2xl border-[1.5px] overflow-hidden mb-2.5 bg-card transition-colors ${expanded ? s.border : "border-sand"}`}>
       <button onClick={onToggle} className="w-full flex gap-3 p-4 cursor-pointer items-start bg-transparent border-none text-left font-body">
@@ -101,7 +139,45 @@ function ScanRow({ item, expanded, onToggle }: { item: typeof SCAN_RESULTS[0]; e
           </div>
           <p className="text-xs text-soft leading-relaxed mb-3">{item.detail}</p>
           <span className="text-[10px] text-soft bg-muted rounded-md px-2 py-1 font-semibold inline-block mb-3">Found in: {item.clause}</span>
-          {item.level !== "green" && (
+
+          {item.question && (
+            <div className="bg-muted/40 border border-sand rounded-xl px-3.5 py-3 mb-3">
+              <p className="text-[13px] font-semibold text-foreground m-0 mb-2.5">{item.question.prompt}</p>
+              {answer === null ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setAnswer("yes")}
+                    className="flex-1 py-2 rounded-full bg-card border-[1.5px] border-sand text-foreground text-xs font-semibold cursor-pointer hover:border-terra/40 transition-colors"
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => setAnswer("no")}
+                    className="flex-1 py-2 rounded-full bg-card border-[1.5px] border-sand text-foreground text-xs font-semibold cursor-pointer hover:border-terra/40 transition-colors"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <div className={`${answer === "yes" ? "bg-success-bg border-success/30" : "bg-info-bg border-info/30"} border rounded-lg px-3 py-2.5`}>
+                  <p className="text-[10px] font-bold uppercase tracking-[1px] mb-1 text-foreground/70">
+                    {answer === "yes" ? "You said yes" : "You said no"}
+                  </p>
+                  <p className="text-[13px] text-foreground leading-relaxed m-0">
+                    {answer === "yes" ? item.question.yesResponse : item.question.noResponse}
+                  </p>
+                  <button
+                    onClick={() => setAnswer(null)}
+                    className="text-[11px] text-soft underline cursor-pointer bg-transparent border-none p-0 mt-2"
+                  >
+                    Change my answer
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {item.level !== "green" && !item.question && (
             <div className="bg-foreground rounded-xl px-3.5 py-3">
               <p className="text-[10px] font-bold text-terra-light uppercase tracking-[1px] mb-1.5">What to do</p>
               <p className="text-[13px] text-card/70 leading-relaxed m-0">{item.action}</p>
@@ -228,17 +304,17 @@ export function ContractScan({ onNav }: ContractScanProps) {
       {phase === "results" && (
         <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
           {/* Verdict banner */}
-          <div className="bg-danger-bg border-[1.5px] border-danger/40 rounded-2xl p-4 mb-5">
-            <p className="text-[11px] uppercase tracking-[1.5px] text-danger font-bold mb-1.5">Scan complete · Do not sign yet</p>
-            <h2 className="font-heading text-xl font-bold text-foreground leading-tight mb-2">We found 1 serious issue and 3 things to review</h2>
-            <p className="text-[13px] text-soft leading-relaxed m-0">There is a balloon payment in this contract that most people miss. Read the red flag below before doing anything else.</p>
+          <div className="bg-info-bg border-[1.5px] border-info/40 rounded-2xl p-4 mb-5">
+            <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-1.5">Scan complete · You're informed</p>
+            <h2 className="font-heading text-xl font-bold text-foreground leading-tight mb-2">Here's what we found in your contract</h2>
+            <p className="text-[13px] text-soft leading-relaxed m-0">A few items are worth a quick conversation with your dealer. Tap each one to see what it means and answer a quick question — we'll guide you from there.</p>
           </div>
 
           {/* Score summary */}
           <div className="flex gap-2 mb-5">
-            <div className="flex-1 bg-danger-bg border border-danger/30 rounded-xl p-3 text-center">
-              <p className="font-heading text-2xl font-bold text-danger m-0">{reds.length}</p>
-              <p className="text-[11px] text-danger font-semibold m-0">High risk</p>
+            <div className="flex-1 bg-info-bg border border-info/30 rounded-xl p-3 text-center">
+              <p className="font-heading text-2xl font-bold text-info m-0">{reds.length}</p>
+              <p className="text-[11px] text-info font-semibold m-0">Confirm</p>
             </div>
             <div className="flex-1 bg-warning-bg border border-warning/30 rounded-xl p-3 text-center">
               <p className="font-heading text-2xl font-bold text-warning m-0">{ambers.length}</p>
@@ -246,18 +322,18 @@ export function ContractScan({ onNav }: ContractScanProps) {
             </div>
             <div className="flex-1 bg-success-bg border border-success/30 rounded-xl p-3 text-center">
               <p className="font-heading text-2xl font-bold text-success m-0">{greens.length}</p>
-              <p className="text-[11px] text-success font-semibold m-0">Clear</p>
+              <p className="text-[11px] text-success font-semibold m-0">All good</p>
             </div>
           </div>
 
           {/* Results grouped */}
-          <p className="text-[11px] uppercase tracking-[1.5px] text-danger font-bold mb-2.5">High risk — act before signing</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-2.5">Worth confirming with your dealer</p>
           {reds.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
-          <p className="text-[11px] uppercase tracking-[1.5px] text-warning font-bold mt-4 mb-2.5">Review before signing</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-warning font-bold mt-4 mb-2.5">Good to review</p>
           {ambers.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
-          <p className="text-[11px] uppercase tracking-[1.5px] text-success font-bold mt-4 mb-2.5">All clear</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-success font-bold mt-4 mb-2.5">All good</p>
           {greens.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
           {/* Actions */}
@@ -273,9 +349,9 @@ export function ContractScan({ onNav }: ContractScanProps) {
             </button>
           </div>
 
-          <div className="bg-warning-bg border border-warning/30 rounded-xl px-3.5 py-3 mt-5">
-            <p className="text-[13px] text-warning leading-relaxed m-0 font-medium">
-              ⏱ <strong>Don't sign under pressure.</strong> Any dealer who says "this offer expires today" is using a sales tactic. Legitimate deals are available tomorrow too.
+          <div className="bg-info-bg border border-info/30 rounded-xl px-3.5 py-3 mt-5">
+            <p className="text-[13px] text-info leading-relaxed m-0 font-medium">
+              💡 <strong>Take your time.</strong> A good deal is still a good deal tomorrow. Use these answers to walk into the dealership feeling confident and in control.
             </p>
           </div>
         </div>
