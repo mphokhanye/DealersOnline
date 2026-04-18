@@ -327,7 +327,7 @@ export function ContractScan({ onNav }: ContractScanProps) {
           </div>
 
           {/* Results grouped */}
-          <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-2.5">Worth confirming with your dealer</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-2.5">Worth confirming with us</p>
           {reds.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
           <p className="text-[11px] uppercase tracking-[1.5px] text-warning font-bold mt-4 mb-2.5">Good to review</p>
