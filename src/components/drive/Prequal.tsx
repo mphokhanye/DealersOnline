@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { ScoreCircle } from "./ScoreCircle";
-import { Lock, Phone } from "lucide-react";
+import { Lock, Phone, Banknote } from "lucide-react";
 import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
+import { BankOffers } from "./BankOffers";
 
 interface PrequalProps {
   query: string;
