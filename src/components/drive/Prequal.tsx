@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { ScoreCircle } from "./ScoreCircle";
-import { Lock, Phone } from "lucide-react";
+import { Lock, Phone, Banknote } from "lucide-react";
 import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
+import { BankOffers } from "./BankOffers";
 
 interface PrequalProps {
   query: string;
@@ -15,6 +16,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
   const [phase, setPhase] = useState<"form" | "loading" | "results">("form");
   const [form, setForm] = useState({ name: "Lerato", surname: "Dlamini", id: "9801010001089", income: "22000" });
   const [consent, setConsent] = useState({ thirdParty: false, terms: false });
+  const [showOffers, setShowOffers] = useState(false);
 
   const canSubmit = consent.thirdParty && consent.terms && form.name && form.id && form.income;
 
@@ -105,6 +107,16 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
     );
   }
 
+  if (showOffers) {
+    return (
+      <BankOffers
+        car={{ make: "Pre-approved", model: "finance offers", year: new Date().getFullYear(), price: "R285,000" }}
+        onNav={onNav}
+        onClose={() => setShowOffers(false)}
+      />
+    );
+  }
+
   return (
     <div className="bg-background min-h-screen">
       <TopBar title="Your results" />
@@ -129,6 +141,17 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
             <span className="text-sm text-terra">🚗 300 cars in your range</span>
           </div>
         </div>
+
+        <button
+          onClick={() => setShowOffers(true)}
+          className="w-full bg-terra text-primary-foreground border-none rounded-xl px-4 py-3.5 mb-3 flex items-center gap-3 cursor-pointer font-body hover:opacity-90 transition-opacity"
+        >
+          <Banknote size={18} />
+          <div className="text-left">
+            <div className="text-sm font-bold">Get bank offers</div>
+            <div className="text-xs opacity-80">Compare rates from 4 banks</div>
+          </div>
+        </button>
 
         <button
           onClick={() => {}}
