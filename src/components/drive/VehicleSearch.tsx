@@ -492,6 +492,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
           })}
         </div>
       )}
+      <HelpWidget context="vehicles" topics={HELP_CONTENT.vehicles} />
     </div>
   );
 }
