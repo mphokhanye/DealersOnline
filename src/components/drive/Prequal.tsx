@@ -16,6 +16,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
   const [phase, setPhase] = useState<"form" | "loading" | "results">("form");
   const [form, setForm] = useState({ name: "Lerato", surname: "Dlamini", id: "9801010001089", income: "22000" });
   const [consent, setConsent] = useState({ thirdParty: false, terms: false });
+  const [showOffers, setShowOffers] = useState(false);
 
   const canSubmit = consent.thirdParty && consent.terms && form.name && form.id && form.income;
 
