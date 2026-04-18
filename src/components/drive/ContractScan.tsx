@@ -32,12 +32,12 @@ const SCAN_RESULTS: ScanItem[] = [
     plain: "At the end of 72 months there is a single lump sum of R42,000 owing. This amount is separate from your monthly payment of R5,450.",
     detail: "The contract refers to this as a 'residual value' of 15.2% of the purchase price. Some buyers choose this to keep monthlies low — others prefer to own the car outright at the end.",
     clause: "Clause 8.3 — Residual Value",
-    action: "If the balloon was your choice, you're all set. If not, ask the dealer to remove it and recalculate — your monthly will go up slightly but you'll own the car outright at the end.",
-    verdict: "Good to confirm with your dealer",
+    action: "If the balloon was your choice, you're all set. If not, ask us to remove it and recalculate — your monthly will go up slightly but you'll own the car outright at the end.",
+    verdict: "Good to confirm with us",
     question: {
       prompt: "Did you request a balloon payment in your deal?",
       yesResponse: "Perfect — you're in control. Balloon payments are a valid choice when you want lower monthlies and plan to refinance, trade in or settle the lump sum at the end.",
-      noResponse: "No problem. Ask the dealer: \"Please remove the balloon and recalculate my instalment without it.\" You'll own the car outright at the end with no surprise lump sum.",
+      noResponse: "No problem. Ask us: \"Please remove the balloon and recalculate my instalment without it.\" You'll own the car outright at the end with no surprise lump sum.",
     },
   },
   {
@@ -48,12 +48,12 @@ const SCAN_RESULTS: ScanItem[] = [
     plain: "Your interest rate is 14.25%. The current prime lending rate is 11.75%, so you're at prime + 2.5%.",
     detail: "Based on your credit profile, you may qualify for a better rate. Banks often have room to move, especially when you ask.",
     clause: "Clause 4.1 — Finance Charges",
-    action: "You have a strong credit score. If you'd like your rate reviewed for a better offer, ask the dealer or tap Yes below to request a review.",
+    action: "You have a strong credit score. If you'd like your rate reviewed for a better offer, ask us or tap Yes below to request a review.",
     verdict: "You may qualify for a better rate",
     question: {
       prompt: "Would you like us to request a rate review for you?",
-      yesResponse: "Great — we'll flag this with the dealer's F&I manager. A simple script: \"My credit profile qualifies for a better rate. Can you match prime + 1.5%?\" Most dealers will revisit the offer.",
-      noResponse: "No problem. If you change your mind, you can always ask the dealer directly — it costs nothing to ask and you're well within your rights.",
+      yesResponse: "Great — we'll flag this with our F&I manager. A simple script: \"My credit profile qualifies for a better rate. Can you match prime + 1.5%?\" Most dealers will revisit the offer.",
+      noResponse: "No problem. If you change your mind, you can always ask us directly — it costs nothing to ask and you're well within your rights.",
     },
   },
   {
@@ -64,7 +64,7 @@ const SCAN_RESULTS: ScanItem[] = [
     plain: "The car costs R219,900. Over the full 72 months you'll pay R387,240 in total — R167,340 of that is interest.",
     detail: "This is normal for a 6-year finance deal, but it's useful to see the full picture so you can decide if a shorter term or larger deposit might suit you better.",
     clause: "Clause 5 — Total Amount Payable",
-    action: "If you'd like to see what a 60-month term or a bigger deposit would look like, the dealer can quickly recalculate for you.",
+    action: "If you'd like to see what a 60-month term or a bigger deposit would look like, we can quickly recalculate for you.",
     verdict: "Good to know — your choice",
     question: {
       prompt: "Would you like to see alternative term options?",
@@ -80,7 +80,7 @@ const SCAN_RESULTS: ScanItem[] = [
     plain: "Your monthly includes R890/month in optional products: Credit Life (R420/mo), Extended Warranty (R290/mo), Tyre & Rim (R180/mo).",
     detail: "These are optional by law and some buyers value the peace of mind. Over 72 months they add R64,080 to the deal, so it's worth confirming each one is something you actually want.",
     clause: "Schedule B — Optional Products",
-    action: "If you chose these intentionally, you're set. If you'd like to review them, the dealer can walk through each one and explain what you'd be giving up by removing it.",
+    action: "If you chose these intentionally, you're set. If you'd like to review them, we can walk through each one and explain what you'd be giving up by removing it.",
     verdict: "Confirm each product is what you want",
     question: {
       prompt: "Did you knowingly choose all three add-on products?",
@@ -307,7 +307,7 @@ export function ContractScan({ onNav }: ContractScanProps) {
           <div className="bg-info-bg border-[1.5px] border-info/40 rounded-2xl p-4 mb-5">
             <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-1.5">Scan complete · You're informed</p>
             <h2 className="font-heading text-xl font-bold text-foreground leading-tight mb-2">Here's what we found in your contract</h2>
-            <p className="text-[13px] text-soft leading-relaxed m-0">A few items are worth a quick conversation with your dealer. Tap each one to see what it means and answer a quick question — we'll guide you from there.</p>
+            <p className="text-[13px] text-soft leading-relaxed m-0">A few items are worth a quick conversation with us. Tap each one to see what it means and answer a quick question — we'll guide you from there.</p>
           </div>
 
           {/* Score summary */}
@@ -327,7 +327,7 @@ export function ContractScan({ onNav }: ContractScanProps) {
           </div>
 
           {/* Results grouped */}
-          <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-2.5">Worth confirming with your dealer</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-2.5">Worth confirming with us</p>
           {reds.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
           <p className="text-[11px] uppercase tracking-[1.5px] text-warning font-bold mt-4 mb-2.5">Good to review</p>
@@ -351,7 +351,7 @@ export function ContractScan({ onNav }: ContractScanProps) {
 
           <div className="bg-info-bg border border-info/30 rounded-xl px-3.5 py-3 mt-5">
             <p className="text-[13px] text-info leading-relaxed m-0 font-medium">
-              💡 <strong>Take your time.</strong> A good deal is still a good deal tomorrow. Use these answers to walk into the dealership feeling confident and in control.
+              💡 <strong>Take your time.</strong> A good deal is still a good deal tomorrow. Use these answers to walk into our showroom feeling confident and in control.
             </p>
           </div>
         </div>
