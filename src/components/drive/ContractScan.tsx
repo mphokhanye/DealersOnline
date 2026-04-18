@@ -6,50 +6,87 @@ interface ContractScanProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
 }
 
-const SCAN_RESULTS = [
+type ScanItem = {
+  id: string;
+  level: "red" | "amber" | "green";
+  icon: string;
+  title: string;
+  plain: string;
+  detail: string;
+  clause: string;
+  action: string;
+  verdict: string;
+  question?: {
+    prompt: string;
+    yesResponse: string;
+    noResponse: string;
+  };
+};
+
+const SCAN_RESULTS: ScanItem[] = [
   {
     id: "balloon",
-    level: "red" as const,
-    icon: "🚨",
-    title: "Balloon payment detected",
-    plain: "At the end of 72 months you will owe a single lump sum of R42,000. This amount is NOT included in your monthly payment of R5,450.",
-    detail: "The contract refers to this as a 'residual value' of 15.2% of the purchase price. Many buyers don't realise this exists until the final payment is due.",
+    level: "red",
+    icon: "🎈",
+    title: "Balloon payment included",
+    plain: "At the end of 72 months there is a single lump sum of R42,000 owing. This amount is separate from your monthly payment of R5,450.",
+    detail: "The contract refers to this as a 'residual value' of 15.2% of the purchase price. Some buyers choose this to keep monthlies low — others prefer to own the car outright at the end.",
     clause: "Clause 8.3 — Residual Value",
-    action: "Ask the dealer to remove the balloon and recalculate. Your monthly will increase slightly but you'll own the car outright at the end.",
-    verdict: "High risk — review before signing",
+    action: "If the balloon was your choice, you're all set. If not, ask the dealer to remove it and recalculate — your monthly will go up slightly but you'll own the car outright at the end.",
+    verdict: "Good to confirm with your dealer",
+    question: {
+      prompt: "Did you request a balloon payment in your deal?",
+      yesResponse: "Perfect — you're in control. Balloon payments are a valid choice when you want lower monthlies and plan to refinance, trade in or settle the lump sum at the end.",
+      noResponse: "No problem. Ask the dealer: \"Please remove the balloon and recalculate my instalment without it.\" You'll own the car outright at the end with no surprise lump sum.",
+    },
   },
   {
     id: "rate",
-    level: "amber" as const,
-    icon: "⚠️",
-    title: "Interest rate is above prime",
-    plain: "Your interest rate is 14.25%. The current prime lending rate is 11.75%. You are being charged 2.5% above prime.",
-    detail: "This is within legal limits but on the higher end for someone with your credit profile. You may be able to negotiate this down.",
+    level: "amber",
+    icon: "📈",
+    title: "Interest rate vs your credit profile",
+    plain: "Your interest rate is 14.25%. The current prime lending rate is 11.75%, so you're at prime + 2.5%.",
+    detail: "Based on your credit profile, you may qualify for a better rate. Banks often have room to move, especially when you ask.",
     clause: "Clause 4.1 — Finance Charges",
-    action: "Ask the dealer: 'Can you match prime + 1.5%?' If they say no, take your pre-approval to a different dealer.",
-    verdict: "Worth negotiating before signing",
+    action: "You have a strong credit score. If you'd like your rate reviewed for a better offer, ask the dealer or tap Yes below to request a review.",
+    verdict: "You may qualify for a better rate",
+    question: {
+      prompt: "Would you like us to request a rate review for you?",
+      yesResponse: "Great — we'll flag this with the dealer's F&I manager. A simple script: \"My credit profile qualifies for a better rate. Can you match prime + 1.5%?\" Most dealers will revisit the offer.",
+      noResponse: "No problem. If you change your mind, you can always ask the dealer directly — it costs nothing to ask and you're well within your rights.",
+    },
   },
   {
     id: "totalcost",
-    level: "amber" as const,
+    level: "amber",
     icon: "💰",
     title: "Total cost of credit",
-    plain: "The car costs R219,900. By the time you finish paying, you will have paid R387,240 in total — R167,340 in interest alone.",
-    detail: "Over 72 months at 14.25%, your interest cost nearly equals the deposit on a small home.",
+    plain: "The car costs R219,900. Over the full 72 months you'll pay R387,240 in total — R167,340 of that is interest.",
+    detail: "This is normal for a 6-year finance deal, but it's useful to see the full picture so you can decide if a shorter term or larger deposit might suit you better.",
     clause: "Clause 5 — Total Amount Payable",
-    action: "Consider a shorter term (60 months) or a larger deposit to reduce total interest paid.",
-    verdict: "Informational — important to know",
+    action: "If you'd like to see what a 60-month term or a bigger deposit would look like, the dealer can quickly recalculate for you.",
+    verdict: "Good to know — your choice",
+    question: {
+      prompt: "Would you like to see alternative term options?",
+      yesResponse: "Smart move. Ask: \"Can you show me the same deal over 60 months, and again with R20,000 more deposit?\" You'll see exactly how much interest you'd save.",
+      noResponse: "All good — the current term works for many buyers. Lower monthlies often matter more than total interest, especially early in your career.",
+    },
   },
   {
     id: "addons",
-    level: "amber" as const,
+    level: "amber",
     icon: "📦",
     title: "3 add-on products bundled in",
-    plain: "Your monthly payment includes R890/month in products you may not have specifically agreed to: Credit Life (R420/mo), Extended Warranty (R290/mo), Tyre & Rim (R180/mo).",
-    detail: "These products are optional by law. Over 72 months these add-ons cost R64,080 — nearly 30% of the car's cash price.",
+    plain: "Your monthly includes R890/month in optional products: Credit Life (R420/mo), Extended Warranty (R290/mo), Tyre & Rim (R180/mo).",
+    detail: "These are optional by law and some buyers value the peace of mind. Over 72 months they add R64,080 to the deal, so it's worth confirming each one is something you actually want.",
     clause: "Schedule B — Optional Products",
-    action: "Ask the F&I manager to remove each product one at a time and explain what you're losing.",
-    verdict: "Review each product individually",
+    action: "If you chose these intentionally, you're set. If you'd like to review them, the dealer can walk through each one and explain what you'd be giving up by removing it.",
+    verdict: "Confirm each product is what you want",
+    question: {
+      prompt: "Did you knowingly choose all three add-on products?",
+      yesResponse: "Perfect — these can be valuable. Credit Life settles the loan if something happens to you, and a warranty can save you on repairs. You're making an informed choice.",
+      noResponse: "Easy fix. Ask: \"Please walk me through each add-on and remove any I didn't specifically request.\" You're allowed to remove them individually — it's your right under the NCA.",
+    },
   },
   {
     id: "fees",
