@@ -107,6 +107,16 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
     );
   }
 
+  if (showOffers) {
+    return (
+      <BankOffers
+        car={{ make: "Pre-approved", model: "finance offers", year: new Date().getFullYear(), price: "R285,000" }}
+        onNav={onNav}
+        onClose={() => setShowOffers(false)}
+      />
+    );
+  }
+
   return (
     <div className="bg-background min-h-screen">
       <TopBar title="Your results" />
