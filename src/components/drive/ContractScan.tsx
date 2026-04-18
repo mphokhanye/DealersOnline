@@ -304,17 +304,17 @@ export function ContractScan({ onNav }: ContractScanProps) {
       {phase === "results" && (
         <div className="px-5 pt-5 pb-8 max-w-md mx-auto">
           {/* Verdict banner */}
-          <div className="bg-danger-bg border-[1.5px] border-danger/40 rounded-2xl p-4 mb-5">
-            <p className="text-[11px] uppercase tracking-[1.5px] text-danger font-bold mb-1.5">Scan complete · Do not sign yet</p>
-            <h2 className="font-heading text-xl font-bold text-foreground leading-tight mb-2">We found 1 serious issue and 3 things to review</h2>
-            <p className="text-[13px] text-soft leading-relaxed m-0">There is a balloon payment in this contract that most people miss. Read the red flag below before doing anything else.</p>
+          <div className="bg-info-bg border-[1.5px] border-info/40 rounded-2xl p-4 mb-5">
+            <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-1.5">Scan complete · You're informed</p>
+            <h2 className="font-heading text-xl font-bold text-foreground leading-tight mb-2">Here's what we found in your contract</h2>
+            <p className="text-[13px] text-soft leading-relaxed m-0">A few items are worth a quick conversation with your dealer. Tap each one to see what it means and answer a quick question — we'll guide you from there.</p>
           </div>
 
           {/* Score summary */}
           <div className="flex gap-2 mb-5">
-            <div className="flex-1 bg-danger-bg border border-danger/30 rounded-xl p-3 text-center">
-              <p className="font-heading text-2xl font-bold text-danger m-0">{reds.length}</p>
-              <p className="text-[11px] text-danger font-semibold m-0">High risk</p>
+            <div className="flex-1 bg-info-bg border border-info/30 rounded-xl p-3 text-center">
+              <p className="font-heading text-2xl font-bold text-info m-0">{reds.length}</p>
+              <p className="text-[11px] text-info font-semibold m-0">Confirm</p>
             </div>
             <div className="flex-1 bg-warning-bg border border-warning/30 rounded-xl p-3 text-center">
               <p className="font-heading text-2xl font-bold text-warning m-0">{ambers.length}</p>
@@ -322,18 +322,18 @@ export function ContractScan({ onNav }: ContractScanProps) {
             </div>
             <div className="flex-1 bg-success-bg border border-success/30 rounded-xl p-3 text-center">
               <p className="font-heading text-2xl font-bold text-success m-0">{greens.length}</p>
-              <p className="text-[11px] text-success font-semibold m-0">Clear</p>
+              <p className="text-[11px] text-success font-semibold m-0">All good</p>
             </div>
           </div>
 
           {/* Results grouped */}
-          <p className="text-[11px] uppercase tracking-[1.5px] text-danger font-bold mb-2.5">High risk — act before signing</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-info font-bold mb-2.5">Worth confirming with your dealer</p>
           {reds.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
-          <p className="text-[11px] uppercase tracking-[1.5px] text-warning font-bold mt-4 mb-2.5">Review before signing</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-warning font-bold mt-4 mb-2.5">Good to review</p>
           {ambers.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
-          <p className="text-[11px] uppercase tracking-[1.5px] text-success font-bold mt-4 mb-2.5">All clear</p>
+          <p className="text-[11px] uppercase tracking-[1.5px] text-success font-bold mt-4 mb-2.5">All good</p>
           {greens.map(r => <ScanRow key={r.id} item={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />)}
 
           {/* Actions */}
