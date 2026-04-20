@@ -44,6 +44,7 @@ export function Profiling({ query, onNav }: ProfilingProps) {
       q: "Finance or cash?",
       opts: [
         { val: "finance", label: "Finance deal", sub: "I'll pay monthly over time" },
+        { val: "finance_deposit", label: "Finance — but I have a deposit", sub: "Monthly with a deposit upfront" },
         { val: "cash", label: "Cash deal", sub: "I'll pay the full amount" },
       ],
     },
