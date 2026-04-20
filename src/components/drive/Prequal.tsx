@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { ScoreCircle } from "./ScoreCircle";
-import { Lock, Phone, Banknote } from "lucide-react";
+import { Lock, Phone } from "lucide-react";
 import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
-import { BankOffers } from "./BankOffers";
 
 interface PrequalProps {
   query: string;
@@ -16,7 +15,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
   const [phase, setPhase] = useState<"form" | "loading" | "results">("form");
   const [form, setForm] = useState({ name: "Lerato", surname: "Dlamini", id: "9801010001089", income: "22000" });
   const [consent, setConsent] = useState({ thirdParty: false, terms: false });
-  const [showOffers, setShowOffers] = useState(false);
+  const [maxMonthly, setMaxMonthly] = useState("");
 
   const canSubmit = consent.thirdParty && consent.terms && form.name && form.id && form.income;
 
@@ -107,16 +106,6 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
     );
   }
 
-  if (showOffers) {
-    return (
-      <BankOffers
-        car={{ make: "Pre-approved", model: "finance offers", year: new Date().getFullYear(), price: "R285,000" }}
-        onNav={onNav}
-        onClose={() => setShowOffers(false)}
-      />
-    );
-  }
-
   return (
     <div className="bg-background min-h-screen">
       <TopBar title="Your results" />
@@ -143,17 +132,6 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
         </div>
 
         <button
-          onClick={() => setShowOffers(true)}
-          className="w-full bg-terra text-primary-foreground border-none rounded-xl px-4 py-3.5 mb-3 flex items-center gap-3 cursor-pointer font-body hover:opacity-90 transition-opacity"
-        >
-          <Banknote size={18} />
-          <div className="text-left">
-            <div className="text-sm font-bold">Get bank offers</div>
-            <div className="text-xs opacity-80">Compare rates from 4 banks</div>
-          </div>
-        </button>
-
-        <button
           onClick={() => {}}
           className="w-full bg-card border-[1.5px] border-sand rounded-xl px-4 py-3.5 mb-4 flex items-center gap-3 cursor-pointer font-body hover:border-terra/40 transition-colors"
         >
@@ -178,12 +156,19 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
             <div className="flex gap-2 items-center">
               <span className="text-sm text-soft">R</span>
               <input
+                value={maxMonthly}
+                onChange={e => setMaxMonthly(e.target.value.replace(/\D/g, ""))}
                 placeholder="Enter max monthly"
                 className="flex-1 border border-sand rounded-lg px-3 py-2 text-sm font-body outline-none focus:border-terra transition-colors bg-background"
               />
               <button
-                onClick={() => onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: 4200 })}
-                className="bg-terra text-primary-foreground border-none rounded-lg px-4 py-2 text-xs font-semibold cursor-pointer"
+                onClick={() => {
+                  const m = parseInt(maxMonthly);
+                  if (!m || m <= 0) return;
+                  onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: m });
+                }}
+                disabled={!maxMonthly || parseInt(maxMonthly) <= 0}
+                className="bg-terra text-primary-foreground border-none rounded-lg px-4 py-2 text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Set
               </button>

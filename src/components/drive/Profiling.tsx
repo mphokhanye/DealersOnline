@@ -44,6 +44,7 @@ export function Profiling({ query, onNav }: ProfilingProps) {
       q: "Finance or cash?",
       opts: [
         { val: "finance", label: "Finance deal", sub: "I'll pay monthly over time" },
+        { val: "finance_deposit", label: "Finance — but I have a deposit", sub: "Monthly with a deposit upfront" },
         { val: "cash", label: "Cash deal", sub: "I'll pay the full amount" },
       ],
     },
@@ -56,7 +57,7 @@ export function Profiling({ query, onNav }: ProfilingProps) {
         { val: "yes5", label: "Yes — around 5%", sub: "Modest deposit available" },
         { val: "no", label: "No deposit", sub: "I'd prefer zero deposit" },
       ],
-      showIf: (a) => a.paymenttype === "finance",
+      showIf: (a) => a.paymenttype === "finance" || a.paymenttype === "finance_deposit",
     },
   ];
 
