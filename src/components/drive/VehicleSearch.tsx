@@ -599,19 +599,21 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                 </div>
               </div>
 
-              {/* Action buttons */}
-              <div className="flex gap-1.5 mb-3.5 flex-wrap">
-                <button onClick={() => openModal("fuel", cur)} className="bg-warning-bg border border-warning/30 rounded-lg px-2.5 py-2 text-[11px] text-warning font-semibold cursor-pointer font-body flex items-center gap-1">
-                  <Fuel size={11} /> Fuel
+              {/* Action buttons: Fuel cost, Reduce price, Save car (matches Browse list) */}
+              <div className="flex gap-1.5 mb-3 flex-wrap">
+                <button onClick={() => openModal("fuel", cur)} className="bg-warning-bg border-none text-warning text-[11px] font-semibold px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                  <Fuel size={11} /> Fuel cost
                 </button>
-                <button onClick={() => openModal("reduce", cur)} className="bg-success-bg border border-success/30 rounded-lg px-2.5 py-2 text-[11px] text-success font-semibold cursor-pointer font-body flex items-center gap-1">
-                  <Tag size={11} /> Reduce
+                <button onClick={() => openModal("reduce", cur)} className="bg-success-bg border-none text-success text-[11px] font-semibold px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                  <Tag size={11} /> Reduce price
                 </button>
-                <button onClick={() => openModal("balloon", cur)} className="bg-terra/10 border border-terra/30 rounded-lg px-2.5 py-2 text-[11px] text-terra font-semibold cursor-pointer font-body flex items-center gap-1">
-                  <CircleDollarSign size={11} /> Balloon
-                </button>
-                <button onClick={() => openModal("tradeIn", cur)} className="bg-info-bg border border-info/30 rounded-lg px-2.5 py-2 text-[11px] text-info font-semibold cursor-pointer font-body flex items-center gap-1">
-                  <ArrowLeftRight size={11} /> Trade-in
+                <button
+                  onClick={() => toggleSave(cur.id)}
+                  className={`border-none text-[11px] font-semibold px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1 ${
+                    saved.includes(cur.id) ? "bg-terra text-primary-foreground" : "bg-terra/10 text-terra"
+                  }`}
+                >
+                  <Heart size={11} className={saved.includes(cur.id) ? "fill-current" : ""} /> {saved.includes(cur.id) ? "Saved" : "Save car"}
                 </button>
               </div>
 
