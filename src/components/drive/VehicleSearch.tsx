@@ -53,12 +53,31 @@ function FuelModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void 
   );
 }
 
+type TradeMode = "none" | "owned" | "financed";
+
 function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void }) {
   const basePrice = parseInt(car.price.replace(/\D/g, ""));
   const [discountPct, setDiscountPct] = useState(8);
   const [deposit, setDeposit] = useState(0);
-  const [tradeIn, setTradeIn] = useState(0);
   const [balloonPct, setBalloonPct] = useState(0);
+
+  // Trade-in flow
+  const [tradeMode, setTradeMode] = useState<TradeMode>("none");
+  const [ownedValue, setOwnedValue] = useState(0);
+  const [finInstalment, setFinInstalment] = useState(0);
+  const [finTerm, setFinTerm] = useState(72);
+  const [finPaid, setFinPaid] = useState(0);
+
+  // Estimate trade-in equity for financed cars
+  // Simple model: remaining balance ≈ instalment * remaining months * 0.7 (rough), assume current market value ≈ instalment * total term * 0.55
+  const remainingMonths = Math.max(0, finTerm - finPaid);
+  const estSettlement = Math.round(finInstalment * remainingMonths * 0.7);
+  const estMarketValue = Math.round(finInstalment * finTerm * 0.55);
+  const finEquity = estMarketValue - estSettlement; // can be negative (shortfall)
+
+  let tradeIn = 0;
+  if (tradeMode === "owned") tradeIn = ownedValue;
+  else if (tradeMode === "financed") tradeIn = Math.max(0, finEquity);
 
   const discountAmt = Math.round(basePrice * discountPct / 100);
   const afterDiscount = basePrice - discountAmt;
@@ -69,7 +88,14 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
   const monthly = financed > 0 ? Math.round((financed * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) : 0;
   const visiblePrice = afterDiscount;
 
-  const interest = Math.floor(40 + Math.random() * 80) + 60; // demo scarcity number, stable per render
+  // Predicted residual values (typical SA depreciation curves: ~55% at 48mo, ~45% at 60mo, ~38% at 72mo)
+  const residual48 = Math.round(basePrice * 0.55);
+  const residual60 = Math.round(basePrice * 0.45);
+  const residual72 = Math.round(basePrice * 0.38);
+  const residuals: Record<number, number> = { 48: residual48, 60: residual60, 72: residual72 };
+  // Warn if balloon at 72mo > residual72 (likely upside-down)
+  const balloonRiskAt72 = balloonAmt > residual72;
+
   const scarcityCount = 100 + (car.id * 17) % 80;
 
   return (
