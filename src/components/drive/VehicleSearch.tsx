@@ -123,10 +123,10 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           )}
         </div>
 
-        {/* Discount */}
+        {/* Discount offer */}
         <div className="mb-4">
           <div className="flex justify-between mb-1.5">
-            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Discount</label>
+            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Discount offer</label>
             <span className="text-xs font-bold text-success">{discountPct}% · -R{discountAmt.toLocaleString()}</span>
           </div>
           <input type="range" min={0} max={15} value={discountPct} onChange={e => setDiscountPct(parseInt(e.target.value))} className="w-full accent-terra" />
@@ -147,19 +147,91 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           />
         </div>
 
-        {/* Trade-in */}
+        {/* Trade-in value */}
         <div className="mb-4">
           <div className="flex justify-between mb-1.5">
             <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Trade-in value</label>
             <span className="text-xs font-bold text-foreground">R{tradeIn.toLocaleString()}</span>
           </div>
-          <input
-            type="number"
-            value={tradeIn || ""}
-            onChange={e => setTradeIn(Math.max(0, parseInt(e.target.value) || 0))}
-            placeholder="Estimated trade-in"
-            className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
-          />
+          <div className="flex gap-2 mb-2">
+            {([["owned", "I own my car"], ["financed", "Under finance"]] as const).map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setTradeMode(tradeMode === val ? "none" : val)}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                  tradeMode === val ? "bg-terra text-primary-foreground border-terra" : "bg-card text-soft border-sand"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {tradeMode === "owned" && (
+            <div className="bg-muted/50 rounded-lg p-3 mt-2">
+              <label className="text-[11px] text-soft block mb-1.5 font-semibold">How much do you think your car is worth?</label>
+              <input
+                type="number"
+                value={ownedValue || ""}
+                onChange={e => setOwnedValue(Math.max(0, parseInt(e.target.value) || 0))}
+                placeholder="e.g. 120000"
+                className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+              />
+            </div>
+          )}
+
+          {tradeMode === "financed" && (
+            <div className="bg-muted/50 rounded-lg p-3 mt-2 space-y-2.5">
+              <div>
+                <label className="text-[11px] text-soft block mb-1 font-semibold">Current monthly instalment (R)</label>
+                <input
+                  type="number"
+                  value={finInstalment || ""}
+                  onChange={e => setFinInstalment(Math.max(0, parseInt(e.target.value) || 0))}
+                  placeholder="e.g. 3500"
+                  className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-soft block mb-1 font-semibold">Original term</label>
+                <div className="flex gap-1.5">
+                  {[60, 72, 84].map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setFinTerm(t)}
+                      className={`flex-1 py-1.5 rounded-md text-xs font-semibold cursor-pointer border transition-colors ${
+                        finTerm === t ? "bg-foreground text-card border-foreground" : "bg-card text-soft border-sand"
+                      }`}
+                    >
+                      {t} mo
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] text-soft block mb-1 font-semibold">Months you've already paid</label>
+                <input
+                  type="number"
+                  value={finPaid || ""}
+                  onChange={e => setFinPaid(Math.max(0, Math.min(finTerm, parseInt(e.target.value) || 0)))}
+                  placeholder={`0 – ${finTerm}`}
+                  className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+                />
+              </div>
+              {finInstalment > 0 && finPaid > 0 && (
+                <div className={`rounded-lg p-2.5 ${finEquity >= 0 ? "bg-success-bg" : "bg-warning-bg"}`}>
+                  <p className={`text-[11px] m-0 font-semibold ${finEquity >= 0 ? "text-success" : "text-warning"}`}>
+                    Est. settlement: R{estSettlement.toLocaleString()} · Market value: R{estMarketValue.toLocaleString()}
+                  </p>
+                  <p className={`text-xs m-0 mt-0.5 font-bold ${finEquity >= 0 ? "text-success" : "text-warning"}`}>
+                    {finEquity >= 0
+                      ? `✅ Equity: R${finEquity.toLocaleString()} (used as trade-in)`
+                      : `⚠ Shortfall: R${Math.abs(finEquity).toLocaleString()} — we'll structure to absorb it`}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Balloon */}
@@ -170,6 +242,33 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           </div>
           <input type="range" min={0} max={35} step={5} value={balloonPct} onChange={e => setBalloonPct(parseInt(e.target.value))} className="w-full accent-terra" />
           <p className="text-[10px] text-soft mt-1 m-0">A balloon lowers monthly but is due as a lump sum at term end.</p>
+
+          {/* Predicted residual values by term */}
+          <div className="mt-3 bg-muted/60 rounded-lg p-3">
+            <p className="text-[10px] uppercase tracking-wider text-soft font-semibold m-0 mb-2">Predicted car value at term end</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[48, 60, 72].map(term => {
+                const val = residuals[term];
+                const safe = balloonAmt === 0 || balloonAmt <= val;
+                return (
+                  <div key={term} className={`rounded-md p-2 text-center border ${safe ? "border-sand bg-card" : "border-warning/40 bg-warning-bg"}`}>
+                    <p className="text-[10px] text-soft m-0">{term} mo</p>
+                    <p className="text-xs font-bold text-foreground m-0">R{(val / 1000).toFixed(0)}k</p>
+                    {balloonAmt > 0 && (
+                      <p className={`text-[9px] m-0 font-semibold ${safe ? "text-success" : "text-warning"}`}>
+                        {safe ? "✓ covers balloon" : "⚠ short"}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {balloonRiskAt72 && (
+              <p className="text-[10px] text-warning m-0 mt-2 font-semibold">
+                ⚠ At 72 months, balloon may exceed the car's value — risk of negative equity.
+              </p>
+            )}
+          </div>
         </div>
 
         <button onClick={onClose} className="w-full py-3 rounded-full bg-terra text-primary-foreground border-none text-sm font-semibold cursor-pointer mb-2">
