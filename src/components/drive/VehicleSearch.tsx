@@ -54,24 +54,104 @@ function FuelModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void 
 }
 
 function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void }) {
-  const discount = Math.round(parseInt(car.price.replace(/\D/g, "")) * 0.08);
-  const newPrice = parseInt(car.price.replace(/\D/g, "")) - discount;
+  const basePrice = parseInt(car.price.replace(/\D/g, ""));
+  const [discountPct, setDiscountPct] = useState(8);
+  const [deposit, setDeposit] = useState(0);
+  const [tradeIn, setTradeIn] = useState(0);
+  const [balloonPct, setBalloonPct] = useState(0);
+
+  const discountAmt = Math.round(basePrice * discountPct / 100);
+  const afterDiscount = basePrice - discountAmt;
+  const balloonAmt = Math.round(afterDiscount * balloonPct / 100);
+  const financed = Math.max(0, afterDiscount - deposit - tradeIn - balloonAmt);
+  const r = 0.115 / 12;
+  const n = 72;
+  const monthly = financed > 0 ? Math.round((financed * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) : 0;
+  const visiblePrice = afterDiscount;
+
+  const interest = Math.floor(40 + Math.random() * 80) + 60; // demo scarcity number, stable per render
+  const scarcityCount = 100 + (car.id * 17) % 80;
+
   return (
     <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
-      <div className="bg-card rounded-t-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <h3 className="font-heading text-xl font-bold text-foreground mb-1">💰 Max discount applied</h3>
-        <p className="text-[13px] text-soft mb-4">{car.year} {car.make} {car.model}</p>
-        <div className="bg-success-bg rounded-xl px-4 py-3 mb-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-success font-semibold">Discount</span>
-            <span className="text-sm text-success font-bold">-R{discount.toLocaleString()}</span>
+      <div className="bg-card rounded-t-2xl p-6 w-full max-w-md max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <h3 className="font-heading text-xl font-bold text-foreground mb-1">💰 Reduce your price</h3>
+        <p className="text-[13px] text-soft mb-3">{car.year} {car.make} {car.model}</p>
+
+        <div className="bg-danger-bg border border-danger/30 rounded-lg px-3.5 py-2.5 mb-4 flex items-start gap-2">
+          <Flame size={14} className="text-danger shrink-0 mt-0.5" />
+          <p className="text-xs text-danger leading-relaxed m-0 font-semibold">
+            🔥 {scarcityCount} people have asked for a reduced price on this car this week.
+          </p>
+        </div>
+
+        <div className="bg-muted rounded-2xl px-5 py-4 text-center mb-4">
+          <p className="text-xs text-soft mb-1 m-0">Your reduced price</p>
+          <p className="font-heading text-3xl font-bold text-terra m-0 mb-1">R{visiblePrice.toLocaleString()}</p>
+          <p className="text-xs text-soft m-0">From R{basePrice.toLocaleString()} · Save R{(basePrice - visiblePrice).toLocaleString()}</p>
+          {financed > 0 && (
+            <p className="text-[13px] text-foreground font-semibold mt-2 mb-0">≈ R{monthly.toLocaleString()}/mo · 72 mo</p>
+          )}
+          {balloonAmt > 0 && (
+            <p className="text-[11px] text-warning mt-1 m-0">+ R{balloonAmt.toLocaleString()} balloon at end</p>
+          )}
+        </div>
+
+        {/* Discount */}
+        <div className="mb-4">
+          <div className="flex justify-between mb-1.5">
+            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Discount</label>
+            <span className="text-xs font-bold text-success">{discountPct}% · -R{discountAmt.toLocaleString()}</span>
           </div>
+          <input type="range" min={0} max={15} value={discountPct} onChange={e => setDiscountPct(parseInt(e.target.value))} className="w-full accent-terra" />
         </div>
-        <div className="bg-muted rounded-2xl px-5 py-4 text-center">
-          <p className="text-xs text-soft mb-1 m-0">Reduced price</p>
-          <p className="font-heading text-3xl font-bold text-terra m-0">R{newPrice.toLocaleString()}</p>
+
+        {/* Deposit */}
+        <div className="mb-4">
+          <div className="flex justify-between mb-1.5">
+            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Deposit</label>
+            <span className="text-xs font-bold text-foreground">R{deposit.toLocaleString()}</span>
+          </div>
+          <input
+            type="number"
+            value={deposit || ""}
+            onChange={e => setDeposit(Math.max(0, parseInt(e.target.value) || 0))}
+            placeholder="Enter cash deposit"
+            className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+          />
         </div>
-        <button onClick={onClose} className="w-full mt-4 py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
+
+        {/* Trade-in */}
+        <div className="mb-4">
+          <div className="flex justify-between mb-1.5">
+            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Trade-in value</label>
+            <span className="text-xs font-bold text-foreground">R{tradeIn.toLocaleString()}</span>
+          </div>
+          <input
+            type="number"
+            value={tradeIn || ""}
+            onChange={e => setTradeIn(Math.max(0, parseInt(e.target.value) || 0))}
+            placeholder="Estimated trade-in"
+            className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+          />
+        </div>
+
+        {/* Balloon */}
+        <div className="mb-5">
+          <div className="flex justify-between mb-1.5">
+            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Balloon payment</label>
+            <span className="text-xs font-bold text-terra">{balloonPct}% · R{balloonAmt.toLocaleString()}</span>
+          </div>
+          <input type="range" min={0} max={35} step={5} value={balloonPct} onChange={e => setBalloonPct(parseInt(e.target.value))} className="w-full accent-terra" />
+          <p className="text-[10px] text-soft mt-1 m-0">A balloon lowers monthly but is due as a lump sum at term end.</p>
+        </div>
+
+        <button onClick={onClose} className="w-full py-3 rounded-full bg-terra text-primary-foreground border-none text-sm font-semibold cursor-pointer mb-2">
+          Apply this price
+        </button>
+        <button onClick={onClose} className="w-full py-2.5 rounded-full bg-transparent text-soft border-none text-xs cursor-pointer">
+          Close
+        </button>
       </div>
     </div>
   );
