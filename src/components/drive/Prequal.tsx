@@ -132,17 +132,6 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
         </div>
 
         <button
-          onClick={() => setShowOffers(true)}
-          className="w-full bg-terra text-primary-foreground border-none rounded-xl px-4 py-3.5 mb-3 flex items-center gap-3 cursor-pointer font-body hover:opacity-90 transition-opacity"
-        >
-          <Banknote size={18} />
-          <div className="text-left">
-            <div className="text-sm font-bold">Get bank offers</div>
-            <div className="text-xs opacity-80">Compare rates from 4 banks</div>
-          </div>
-        </button>
-
-        <button
           onClick={() => {}}
           className="w-full bg-card border-[1.5px] border-sand rounded-xl px-4 py-3.5 mb-4 flex items-center gap-3 cursor-pointer font-body hover:border-terra/40 transition-colors"
         >
