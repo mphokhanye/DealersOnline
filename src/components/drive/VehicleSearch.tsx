@@ -295,6 +295,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
   const [mode, setMode] = useState<"tinder" | "list">(initialIsVehicle ? "list" : "tinder");
   const [cardIdx, setCardIdx] = useState(0);
   const [liked, setLiked] = useState<number[]>([]);
+  const [saved, setSaved] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState("match");
   const [modalType, setModalType] = useState<ModalType>(null);
   const [modalCar, setModalCar] = useState<typeof CARS[0] | null>(null);
@@ -306,6 +307,10 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
   const [showContractScan, setShowContractScan] = useState(false);
   const name = prequalified ? "Lerato" : "there";
   const isCash = answers?.paymenttype === "cash";
+
+  function toggleSave(id: number) {
+    setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  }
 
   const suggestions = [
     "Something reliable and safe under R5,450 per month",
