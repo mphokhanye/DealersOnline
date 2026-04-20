@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { ScoreCircle } from "./ScoreCircle";
-import { Lock, Phone, Banknote } from "lucide-react";
+import { Lock, Phone } from "lucide-react";
 import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
-import { BankOffers } from "./BankOffers";
 
 interface PrequalProps {
   query: string;
@@ -16,7 +15,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
   const [phase, setPhase] = useState<"form" | "loading" | "results">("form");
   const [form, setForm] = useState({ name: "Lerato", surname: "Dlamini", id: "9801010001089", income: "22000" });
   const [consent, setConsent] = useState({ thirdParty: false, terms: false });
-  const [showOffers, setShowOffers] = useState(false);
+  const [maxMonthly, setMaxMonthly] = useState("");
 
   const canSubmit = consent.thirdParty && consent.terms && form.name && form.id && form.income;
 
@@ -104,16 +103,6 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
           <p className="text-sm text-soft">Running a soft credit check…</p>
         </div>
       </div>
-    );
-  }
-
-  if (showOffers) {
-    return (
-      <BankOffers
-        car={{ make: "Pre-approved", model: "finance offers", year: new Date().getFullYear(), price: "R285,000" }}
-        onNav={onNav}
-        onClose={() => setShowOffers(false)}
-      />
     );
   }
 
