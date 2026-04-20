@@ -77,7 +77,7 @@ const SCAN_RESULTS: ScanItem[] = [
     level: "amber",
     icon: "📦",
     title: "3 add-on products bundled in",
-    plain: "Your monthly includes R890/month in optional products: Credit Life (R420/mo), Extended Warranty (R290/mo), Tyre & Rim (R180/mo).",
+    plain: "Your monthly includes R890/pm in optional products: Credit Life (R420/pm), Extended Warranty (R290/pm), Tyre & Rim (R180/pm).",
     detail: "These are optional by law and some buyers value the peace of mind. Over 72 months they add R64,080 to the deal, so it's worth confirming each one is something you actually want.",
     clause: "Schedule B — Optional Products",
     action: "If you chose these intentionally, you're set. If you'd like to review them, we can walk through each one and explain what you'd be giving up by removing it.",
