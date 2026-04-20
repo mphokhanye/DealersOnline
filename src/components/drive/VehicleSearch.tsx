@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TopBar } from "./TopBar";
 import { BankOffers } from "./BankOffers";
 import { ContractScan } from "./ContractScan";
-import { Fuel, Tag, ArrowLeftRight, Search, FileCheck, CircleDollarSign, ChevronDown, ChevronUp } from "lucide-react";
+import { Fuel, Tag, ArrowLeftRight, Search, FileCheck, CircleDollarSign, ChevronDown, ChevronUp, Heart, Flame } from "lucide-react";
 import { HelpWidget, HELP_CONTENT } from "./HelpWidget";
 
 interface VehicleSearchProps {
