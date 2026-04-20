@@ -520,8 +520,45 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
             ))}
           </div>
 
+          {/* Saved cars at top */}
+          {saved.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart size={14} className="text-terra fill-terra" />
+                <h3 className="text-[13px] font-bold text-foreground m-0">Your saved cars ({saved.length})</h3>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5">
+                {sorted.filter(c => saved.includes(c.id)).map(car => (
+                  <div key={`saved-${car.id}`} className="bg-card border-[1.5px] border-terra/40 rounded-xl shrink-0 w-44 overflow-hidden">
+                    <div className="bg-gradient-to-br from-muted to-sand h-20 flex items-center justify-center text-3xl relative">
+                      🚗
+                      <button
+                        onClick={() => toggleSave(car.id)}
+                        className="absolute top-1.5 right-1.5 bg-card/90 border-none w-6 h-6 rounded-full flex items-center justify-center cursor-pointer"
+                        aria-label="Remove from saved"
+                      >
+                        <Heart size={12} className="text-terra fill-terra" />
+                      </button>
+                    </div>
+                    <div className="p-2.5">
+                      <p className="text-[11px] font-bold text-foreground m-0 truncate">{car.year} {car.make} {car.model}</p>
+                      <p className="text-[11px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
+                      <button
+                        onClick={() => handleBankOffer(car)}
+                        className="w-full mt-1.5 py-1 rounded-full border-none text-[10px] font-bold cursor-pointer bg-terra text-primary-foreground"
+                      >
+                        {isCash ? "Make offer" : "Get offer"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {sorted.map(car => {
             const isExpanded = expandedCard === car.id;
+            const isSaved = saved.includes(car.id);
             return (
               <div key={car.id} className="bg-card border-[1.5px] border-sand rounded-2xl overflow-hidden mb-2.5">
                 {/* Large image area */}
@@ -538,24 +575,23 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                   </div>
                   <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.transmission} · {car.fuelType}{!isCash ? ` · ${car.price}` : ""}</p>
 
-                  {/* View more toggle */}
-                  {isExpanded && (
-                    <div className="flex gap-1.5 flex-wrap mb-3 animate-fade-in">
-                      <button onClick={() => openModal("fuel", car)} className="bg-warning-bg border-none text-warning text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
-                        <Fuel size={10} /> Fuel cost
-                      </button>
-                      <button onClick={() => openModal("reduce", car)} className="bg-success-bg border-none text-success text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
-                        <Tag size={10} /> Reduce price
-                      </button>
-                      <button onClick={() => openModal("balloon", car)} className="bg-terra/10 border-none text-terra text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
-                        <CircleDollarSign size={10} /> Balloon
-                      </button>
-                      <button onClick={() => openModal("tradeIn", car)} className="bg-info-bg border-none text-info text-[10px] font-semibold px-2.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
-                        <ArrowLeftRight size={10} /> Trade-in
-                      </button>
-                      {liked.includes(car.id) && <span className="bg-success-bg text-success text-[10px] font-semibold px-2 py-1.5 rounded-full">Liked ✓</span>}
-                    </div>
-                  )}
+                  {/* Action buttons: Fuel cost, Reduce price, Save car */}
+                  <div className="flex gap-1.5 mb-3 flex-wrap">
+                    <button onClick={() => openModal("fuel", car)} className="bg-warning-bg border-none text-warning text-[11px] font-semibold px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                      <Fuel size={11} /> Fuel cost
+                    </button>
+                    <button onClick={() => openModal("reduce", car)} className="bg-success-bg border-none text-success text-[11px] font-semibold px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1">
+                      <Tag size={11} /> Reduce price
+                    </button>
+                    <button
+                      onClick={() => toggleSave(car.id)}
+                      className={`border-none text-[11px] font-semibold px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1 ${
+                        isSaved ? "bg-terra text-primary-foreground" : "bg-terra/10 text-terra"
+                      }`}
+                    >
+                      <Heart size={11} className={isSaved ? "fill-current" : ""} /> {isSaved ? "Saved" : "Save car"}
+                    </button>
+                  </div>
 
                   <div className="flex gap-2">
                     <button
@@ -571,6 +607,14 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                       {isCash ? "Make offer" : "Get bank offer"}
                     </button>
                   </div>
+
+                  {isExpanded && (
+                    <div className="mt-3 pt-3 border-t border-sand text-xs text-soft animate-fade-in">
+                      <p className="m-0 mb-1"><span className="text-foreground font-semibold">Match score:</span> {car.match}%</p>
+                      <p className="m-0 mb-1"><span className="text-foreground font-semibold">Fuel:</span> {car.fuel}L/100km</p>
+                      <p className="m-0"><span className="text-foreground font-semibold">Service plan:</span> {car.servicePlan ? "Included ✓" : "Not included"}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             );
