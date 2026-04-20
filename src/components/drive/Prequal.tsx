@@ -142,7 +142,7 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
           </div>
         </button>
 
-        <p className="text-[15px] font-semibold text-foreground mb-3">Are you happy with R5,450/month?</p>
+        <p className="text-[15px] font-semibold text-foreground mb-3">Are you happy with R5,450/pm?</p>
         <div className="flex flex-col gap-2 mb-5">
           <button
             onClick={() => onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: 5450 })}

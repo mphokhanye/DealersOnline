@@ -7,7 +7,7 @@ interface LandingProps {
 
 const TYPING_QUERIES = [
   "What interest rate will the bank give me?",
-  "Best reliable car under R8,000/month",
+  "Best reliable car under R8,000/pm",
   "Alternatives for a Nissan Magnite?",
   "Which SUV has the lowest fuel cost?",
   "Can I afford a BMW 3 Series?",
@@ -65,7 +65,7 @@ export function Landing({ onNav }: LandingProps) {
   const examples = [
     "What interest rate will the bank give me?",
     "What better alternatives to a Nissan Magnite are available?",
-    "Best reliable car under R8,000/month",
+    "Best reliable car under R8,000/pm",
   ];
 
   function submit(q: string) {

@@ -15,11 +15,11 @@ interface VehicleSearchProps {
 }
 
 const CARS = [
-  { id: 1, make: "Toyota", model: "Corolla", year: 2020, mileage: "62,000 km", price: "R219,900", monthly: "R4,890/mo", servicePlan: true, transmission: "Automatic", fuelType: "Petrol", fuel: 6.8, match: 96, tag: "Best match" },
-  { id: 2, make: "Honda", model: "Civic", year: 2019, mileage: "54,000 km", price: "R198,500", monthly: "R4,420/mo", servicePlan: true, transmission: "Manual", fuelType: "Petrol", fuel: 7.1, match: 91, tag: "Fuel saver" },
-  { id: 3, make: "Mazda", model: "3", year: 2021, mileage: "38,000 km", price: "R249,000", monthly: "R5,380/mo", servicePlan: false, transmission: "Automatic", fuelType: "Petrol", fuel: 6.5, match: 87, tag: "Premium feel" },
-  { id: 4, make: "Hyundai", model: "Elantra", year: 2020, mileage: "71,000 km", price: "R179,900", monthly: "R4,010/mo", servicePlan: true, transmission: "Manual", fuelType: "Diesel", fuel: 7.4, match: 83, tag: "Best price" },
-  { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/mo", servicePlan: true, transmission: "Automatic", fuelType: "Diesel", fuel: 6.2, match: 79, tag: "Low mileage" },
+  { id: 1, make: "Toyota", model: "Corolla", year: 2020, mileage: "62,000 km", price: "R219,900", monthly: "R4,890/pm", servicePlan: true, transmission: "Automatic", fuelType: "Petrol", fuel: 6.8, match: 96, tag: "Best match" },
+  { id: 2, make: "Honda", model: "Civic", year: 2019, mileage: "54,000 km", price: "R198,500", monthly: "R4,420/pm", servicePlan: true, transmission: "Manual", fuelType: "Petrol", fuel: 7.1, match: 91, tag: "Fuel saver" },
+  { id: 3, make: "Mazda", model: "3", year: 2021, mileage: "38,000 km", price: "R249,000", monthly: "R5,380/pm", servicePlan: false, transmission: "Automatic", fuelType: "Petrol", fuel: 6.5, match: 87, tag: "Premium feel" },
+  { id: 4, make: "Hyundai", model: "Elantra", year: 2020, mileage: "71,000 km", price: "R179,900", monthly: "R4,010/pm", servicePlan: true, transmission: "Manual", fuelType: "Diesel", fuel: 7.4, match: 83, tag: "Best price" },
+  { id: 5, make: "VW", model: "Polo", year: 2021, mileage: "29,000 km", price: "R265,000", monthly: "R5,450/pm", servicePlan: true, transmission: "Automatic", fuelType: "Diesel", fuel: 6.2, match: 79, tag: "Low mileage" },
 ];
 
 type ModalType = "fuel" | "reduce" | "tradeIn" | "balloon" | null;
@@ -45,7 +45,7 @@ function FuelModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void 
         <div className="bg-muted rounded-2xl px-5 py-4 text-center">
           <p className="text-xs text-soft mb-1 m-0">Estimated monthly fuel cost</p>
           <p className="font-heading text-4xl font-bold text-terra m-0 mb-1">R{cost.toLocaleString()}</p>
-          <p className="text-[11px] text-soft m-0">Based on ~{Math.round(km).toLocaleString()} km/month · R{fuelPrice}/L</p>
+          <p className="text-[11px] text-soft m-0">Based on ~{Math.round(km).toLocaleString()} km/pm · R{fuelPrice}/L</p>
         </div>
         <button onClick={onClose} className="w-full mt-4 py-3 rounded-full bg-muted text-soft border-none text-sm font-semibold cursor-pointer">Close</button>
       </div>
@@ -116,7 +116,7 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           <p className="font-heading text-3xl font-bold text-terra m-0 mb-1">R{visiblePrice.toLocaleString()}</p>
           <p className="text-xs text-soft m-0">From R{basePrice.toLocaleString()} · Save R{(basePrice - visiblePrice).toLocaleString()}</p>
           {financed > 0 && (
-            <p className="text-[13px] text-foreground font-semibold mt-2 mb-0">≈ R{monthly.toLocaleString()}/mo · 72 mo</p>
+            <p className="text-[13px] text-foreground font-semibold mt-2 mb-0">≈ R{monthly.toLocaleString()}/pm · 72 mo</p>
           )}
           {balloonAmt > 0 && (
             <p className="text-[11px] text-warning mt-1 m-0">+ R{balloonAmt.toLocaleString()} balloon at end</p>
@@ -305,17 +305,17 @@ function BalloonModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => vo
         <div className="bg-muted rounded-xl px-4 py-3 mb-3">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-soft">Without balloon</span>
-            <span className="text-sm font-semibold text-foreground">R{monthlyWithout.toLocaleString()}/mo</span>
+            <span className="text-sm font-semibold text-foreground">R{monthlyWithout.toLocaleString()}/pm</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-xs text-soft">With {balloonPercent}% balloon</span>
-            <span className="text-sm font-bold text-terra">R{monthlyWithBalloon.toLocaleString()}/mo</span>
+            <span className="text-sm font-bold text-terra">R{monthlyWithBalloon.toLocaleString()}/pm</span>
           </div>
         </div>
         <div className="bg-success-bg rounded-xl px-4 py-3 mb-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-success font-semibold">Monthly saving</span>
-            <span className="text-sm text-success font-bold">R{saving.toLocaleString()}/mo</span>
+            <span className="text-sm text-success font-bold">R{saving.toLocaleString()}/pm</span>
           </div>
         </div>
         <div className="bg-muted rounded-xl px-4 py-3 mb-3">
@@ -455,7 +455,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
     const make = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : "Vehicle";
     const model = parts.slice(1).join(" ") || "Model";
     filtered = [{
-      id: 999, make, model, year: 2021, mileage: "45,000 km", price: "R229,000", monthly: "R5,050/mo",
+      id: 999, make, model, year: 2021, mileage: "45,000 km", price: "R229,000", monthly: "R5,050/pm",
       servicePlan: true, transmission: "Automatic", fuelType: "Petrol", fuel: 6.9, match: 88, tag: "Your search",
     }];
   }
