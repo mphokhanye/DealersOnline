@@ -156,12 +156,19 @@ export function Prequal({ query, answers, na, onNav }: PrequalProps) {
             <div className="flex gap-2 items-center">
               <span className="text-sm text-soft">R</span>
               <input
+                value={maxMonthly}
+                onChange={e => setMaxMonthly(e.target.value.replace(/\D/g, ""))}
                 placeholder="Enter max monthly"
                 className="flex-1 border border-sand rounded-lg px-3 py-2 text-sm font-body outline-none focus:border-terra transition-colors bg-background"
               />
               <button
-                onClick={() => onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: 4200 })}
-                className="bg-terra text-primary-foreground border-none rounded-lg px-4 py-2 text-xs font-semibold cursor-pointer"
+                onClick={() => {
+                  const m = parseInt(maxMonthly);
+                  if (!m || m <= 0) return;
+                  onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: m });
+                }}
+                disabled={!maxMonthly || parseInt(maxMonthly) <= 0}
+                className="bg-terra text-primary-foreground border-none rounded-lg px-4 py-2 text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Set
               </button>
