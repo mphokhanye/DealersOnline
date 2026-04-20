@@ -57,7 +57,7 @@ export function Profiling({ query, onNav }: ProfilingProps) {
         { val: "yes5", label: "Yes — around 5%", sub: "Modest deposit available" },
         { val: "no", label: "No deposit", sub: "I'd prefer zero deposit" },
       ],
-      showIf: (a) => a.paymenttype === "finance",
+      showIf: (a) => a.paymenttype === "finance" || a.paymenttype === "finance_deposit",
     },
   ];
 
