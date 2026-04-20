@@ -115,11 +115,16 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           <p className="text-xs text-soft mb-1 m-0">Your reduced price</p>
           <p className="font-heading text-3xl font-bold text-terra m-0 mb-1">R{visiblePrice.toLocaleString()}</p>
           <p className="text-xs text-soft m-0">From R{basePrice.toLocaleString()} · Save R{(basePrice - visiblePrice).toLocaleString()}</p>
-          {financed > 0 && (
-            <p className="text-[13px] text-foreground font-semibold mt-2 mb-0">≈ R{monthly.toLocaleString()}/pm · 72 mo</p>
-          )}
+          <div className="mt-3 pt-3 border-t border-sand/60">
+            <p className="text-[10px] uppercase tracking-wider text-soft m-0 mb-1 font-semibold">New monthly instalment</p>
+            <p className="font-heading text-2xl font-bold text-foreground m-0">R{monthly.toLocaleString()}<span className="text-sm font-semibold text-soft">/pm</span></p>
+            <p className="text-[11px] text-soft m-0 mt-0.5">vs. R{originalMonthly.toLocaleString()}/pm · 72 mo @ 11.5%</p>
+            {monthly < originalMonthly && (
+              <p className="text-[11px] text-success font-semibold m-0 mt-1">↓ R{(originalMonthly - monthly).toLocaleString()}/pm saved</p>
+            )}
+          </div>
           {balloonAmt > 0 && (
-            <p className="text-[11px] text-warning mt-1 m-0">+ R{balloonAmt.toLocaleString()} balloon at end</p>
+            <p className="text-[11px] text-warning mt-2 m-0">+ R{balloonAmt.toLocaleString()} balloon due at end</p>
           )}
         </div>
 
