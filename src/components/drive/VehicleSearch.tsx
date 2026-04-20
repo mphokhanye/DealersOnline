@@ -86,6 +86,7 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
   const r = 0.115 / 12;
   const n = 72;
   const monthly = financed > 0 ? Math.round((financed * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) : 0;
+  const originalMonthly = Math.round((basePrice * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
   const visiblePrice = afterDiscount;
 
   // Predicted residual values (typical SA depreciation curves: ~55% at 48mo, ~45% at 60mo, ~38% at 72mo)
