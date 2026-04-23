@@ -148,30 +148,6 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
         <h3 className="font-heading text-xl font-bold text-foreground mb-0.5">Build a deal you can afford</h3>
         <p className="text-[13px] text-soft mb-1">{car.year} {car.make} {car.model}</p>
 
-        {/* 3-step mental model */}
-        <div className="flex gap-1 mb-4">
-          {[
-            { n: 1, label: "Set target" },
-            { n: 2, label: "Adjust deal" },
-            { n: 3, label: "Future cost" },
-          ].map(s => (
-            <button
-              key={s.n}
-              onClick={() => setStep(s.n)}
-              className={`flex-1 py-1.5 rounded-full text-[10px] font-semibold cursor-pointer border transition-colors ${
-                step >= s.n ? "bg-terra text-primary-foreground border-terra" : "bg-muted text-soft border-sand"
-              }`}
-            >
-              {s.n}. {s.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Optimisation banner */}
-        <div className="bg-terra/10 border border-terra/20 rounded-lg px-3 py-2 mb-4">
-          <p className="text-[11px] text-terra m-0 font-semibold">🧠 We optimise your deal to maximise approval chances</p>
-        </div>
-
         {/* PRIMARY: Monthly payment anchor */}
         <div className="bg-muted rounded-2xl px-5 py-5 text-center mb-4">
           <p className="text-[10px] uppercase tracking-wider text-soft m-0 mb-1 font-semibold">Your monthly payment</p>
