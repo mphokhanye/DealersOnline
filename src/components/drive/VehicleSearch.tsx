@@ -483,16 +483,10 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           </div>
         )}
 
-        {/* Smart hint */}
-        <div className="bg-muted/50 rounded-lg px-3 py-2 mb-4">
-          <p className="text-[10px] text-soft m-0">💡 Not sure what to choose? We'll recommend the best deal after this step.</p>
-        </div>
-
         {/* CTA */}
-        <button onClick={onClose} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-1">
+        <button onClick={onClose} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-3">
           Continue with this deal
         </button>
-        <p className="text-[10px] text-soft text-center m-0 mb-2">You'll see your approval chances next</p>
         <button onClick={onClose} className="w-full py-2 rounded-full bg-transparent text-soft border-none text-xs cursor-pointer">
           Cancel
         </button>
