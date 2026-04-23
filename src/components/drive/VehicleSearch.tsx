@@ -746,7 +746,17 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
   return (
     <div className="bg-background min-h-screen">
       {modalType === "fuel" && modalCar && <FuelModal car={modalCar} onClose={() => setModalType(null)} />}
-      {modalType === "reduce" && modalCar && <ReducePriceModal car={modalCar} onClose={() => setModalType(null)} />}
+      {modalType === "reduce" && modalCar && (
+        <ReducePriceModal 
+          car={modalCar} 
+          onClose={() => setModalType(null)} 
+          onApply={(changes) => {
+            if (modalCar) {
+              setCarDeals(prev => ({ ...prev, [modalCar.id]: changes }));
+            }
+          }}
+        />
+      )}
       {modalType === "balloon" && modalCar && <BalloonModal car={modalCar} onClose={() => setModalType(null)} />}
       {modalType === "tradeIn" && <TradeInModal onClose={() => setModalType(null)} />}
       {showPrequalGate && (
