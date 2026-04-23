@@ -945,7 +945,16 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                 <div className="p-4">
                   <div className="flex justify-between mb-1">
                     <p className="text-[15px] font-bold text-foreground m-0">{car.year} {car.make} {car.model}</p>
-                    <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
+                    <div className="text-right">
+                      {carDeals[car.id] ? (
+                        <>
+                          <p className="text-[15px] font-bold text-terra m-0">R{carDeals[car.id].newMonthly.toLocaleString()}/pm</p>
+                          <p className="text-[11px] text-soft m-0 line-through">{car.monthly}</p>
+                        </>
+                      ) : (
+                        <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
+                      )}
+                    </div>
                   </div>
                   <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.transmission} · {car.fuelType}{!isCash ? ` · ${car.price}` : ""}</p>
 
