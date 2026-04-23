@@ -55,7 +55,17 @@ function FuelModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void 
 
 type TradeMode = "none" | "owned" | "financed";
 
-function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void }) {
+interface DealChanges {
+  discountPct: number;
+  deposit: number;
+  tradeIn: number;
+  balloonPct: number;
+  balloonOn: boolean;
+  newMonthly: number;
+  newPrice: number;
+}
+
+function ReducePriceModal({ car, onClose, onApply }: { car: typeof CARS[0]; onClose: () => void; onApply?: (changes: DealChanges) => void }) {
   const basePrice = parseInt(car.price.replace(/\D/g, ""));
   const [discountPct, setDiscountPct] = useState(8);
   const [deposit, setDeposit] = useState(0);
@@ -147,30 +157,6 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
         {/* Header */}
         <h3 className="font-heading text-xl font-bold text-foreground mb-0.5">Build a deal you can afford</h3>
         <p className="text-[13px] text-soft mb-1">{car.year} {car.make} {car.model}</p>
-
-        {/* 3-step mental model */}
-        <div className="flex gap-1 mb-4">
-          {[
-            { n: 1, label: "Set target" },
-            { n: 2, label: "Adjust deal" },
-            { n: 3, label: "Future cost" },
-          ].map(s => (
-            <button
-              key={s.n}
-              onClick={() => setStep(s.n)}
-              className={`flex-1 py-1.5 rounded-full text-[10px] font-semibold cursor-pointer border transition-colors ${
-                step >= s.n ? "bg-terra text-primary-foreground border-terra" : "bg-muted text-soft border-sand"
-              }`}
-            >
-              {s.n}. {s.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Optimisation banner */}
-        <div className="bg-terra/10 border border-terra/20 rounded-lg px-3 py-2 mb-4">
-          <p className="text-[11px] text-terra m-0 font-semibold">🧠 We optimise your deal to maximise approval chances</p>
-        </div>
 
         {/* PRIMARY: Monthly payment anchor */}
         <div className="bg-muted rounded-2xl px-5 py-5 text-center mb-4">
@@ -507,16 +493,23 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
           </div>
         )}
 
-        {/* Smart hint */}
-        <div className="bg-muted/50 rounded-lg px-3 py-2 mb-4">
-          <p className="text-[10px] text-soft m-0">💡 Not sure what to choose? We'll recommend the best deal after this step.</p>
-        </div>
-
         {/* CTA */}
-        <button onClick={onClose} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-1">
+        <button onClick={() => {
+          if (onApply) {
+            onApply({
+              discountPct,
+              deposit,
+              tradeIn,
+              balloonPct,
+              balloonOn,
+              newMonthly: monthly,
+              newPrice: afterDiscount - deposit - tradeIn
+            });
+          }
+          onClose();
+        }} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-3">
           Continue with this deal
         </button>
-        <p className="text-[10px] text-soft text-center m-0 mb-2">You'll see your approval chances next</p>
         <button onClick={onClose} className="w-full py-2 rounded-full bg-transparent text-soft border-none text-xs cursor-pointer">
           Cancel
         </button>
@@ -673,6 +666,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
   const [pendingBankCar, setPendingBankCar] = useState<typeof CARS[0] | null>(null);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [showContractScan, setShowContractScan] = useState(false);
+  const [carDeals, setCarDeals] = useState<Record<number, DealChanges>>({});
   const name = prequalified ? "Lerato" : "there";
   const isCash = answers?.paymenttype === "cash";
 
@@ -752,7 +746,17 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
   return (
     <div className="bg-background min-h-screen">
       {modalType === "fuel" && modalCar && <FuelModal car={modalCar} onClose={() => setModalType(null)} />}
-      {modalType === "reduce" && modalCar && <ReducePriceModal car={modalCar} onClose={() => setModalType(null)} />}
+      {modalType === "reduce" && modalCar && (
+        <ReducePriceModal 
+          car={modalCar} 
+          onClose={() => setModalType(null)} 
+          onApply={(changes) => {
+            if (modalCar) {
+              setCarDeals(prev => ({ ...prev, [modalCar.id]: changes }));
+            }
+          }}
+        />
+      )}
       {modalType === "balloon" && modalCar && <BalloonModal car={modalCar} onClose={() => setModalType(null)} />}
       {modalType === "tradeIn" && <TradeInModal onClose={() => setModalType(null)} />}
       {showPrequalGate && (
@@ -837,8 +841,17 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                   <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.transmission} · {cur.fuelType}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-terra m-0 mb-0.5">{isCash ? cur.price : cur.monthly}</p>
-                  {!isCash && <p className="text-[11px] text-soft m-0">{cur.price} total</p>}
+                  {carDeals[cur.id] ? (
+                    <>
+                      <p className="text-xl font-bold text-terra m-0 mb-0.5">R{carDeals[cur.id].newMonthly.toLocaleString()}/pm</p>
+                      <p className="text-[11px] text-soft m-0 line-through">{cur.monthly}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xl font-bold text-terra m-0 mb-0.5">{isCash ? cur.price : cur.monthly}</p>
+                      {!isCash && <p className="text-[11px] text-soft m-0">{cur.price} total</p>}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -941,7 +954,16 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                 <div className="p-4">
                   <div className="flex justify-between mb-1">
                     <p className="text-[15px] font-bold text-foreground m-0">{car.year} {car.make} {car.model}</p>
-                    <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
+                    <div className="text-right">
+                      {carDeals[car.id] ? (
+                        <>
+                          <p className="text-[15px] font-bold text-terra m-0">R{carDeals[car.id].newMonthly.toLocaleString()}/pm</p>
+                          <p className="text-[11px] text-soft m-0 line-through">{car.monthly}</p>
+                        </>
+                      ) : (
+                        <p className="text-[15px] font-bold text-terra m-0">{isCash ? car.price : car.monthly}</p>
+                      )}
+                    </div>
                   </div>
                   <p className="text-xs text-soft m-0 mb-3">{car.mileage} · {car.transmission} · {car.fuelType}{!isCash ? ` · ${car.price}` : ""}</p>
 
