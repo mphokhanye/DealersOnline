@@ -55,7 +55,17 @@ function FuelModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void 
 
 type TradeMode = "none" | "owned" | "financed";
 
-function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () => void }) {
+interface DealChanges {
+  discountPct: number;
+  deposit: number;
+  tradeIn: number;
+  balloonPct: number;
+  balloonOn: boolean;
+  newMonthly: number;
+  newPrice: number;
+}
+
+function ReducePriceModal({ car, onClose, onApply }: { car: typeof CARS[0]; onClose: () => void; onApply?: (changes: DealChanges) => void }) {
   const basePrice = parseInt(car.price.replace(/\D/g, ""));
   const [discountPct, setDiscountPct] = useState(8);
   const [deposit, setDeposit] = useState(0);
