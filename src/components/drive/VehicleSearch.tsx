@@ -494,7 +494,20 @@ function ReducePriceModal({ car, onClose, onApply }: { car: typeof CARS[0]; onCl
         )}
 
         {/* CTA */}
-        <button onClick={onClose} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-3">
+        <button onClick={() => {
+          if (onApply) {
+            onApply({
+              discountPct,
+              deposit,
+              tradeIn,
+              balloonPct,
+              balloonOn,
+              newMonthly: monthly,
+              newPrice: afterDiscount - deposit - tradeIn
+            });
+          }
+          onClose();
+        }} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-3">
           Continue with this deal
         </button>
         <button onClick={onClose} className="w-full py-2 rounded-full bg-transparent text-soft border-none text-xs cursor-pointer">
