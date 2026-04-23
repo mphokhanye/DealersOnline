@@ -60,20 +60,22 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
   const [discountPct, setDiscountPct] = useState(8);
   const [deposit, setDeposit] = useState(0);
   const [balloonPct, setBalloonPct] = useState(0);
+  const [balloonOn, setBalloonOn] = useState(false);
+
+  // Progressive disclosure
+  const [step, setStep] = useState(1); // 1=discount, 2=deposit+trade, 3=balloon+value
 
   // Trade-in flow
-  const [tradeMode, setTradeMode] = useState<TradeMode>("none");
+  const [tradeMode, setTradeMode] = useState<"none" | "owned" | "financed">("none");
   const [ownedValue, setOwnedValue] = useState(0);
   const [finInstalment, setFinInstalment] = useState(0);
   const [finTerm, setFinTerm] = useState(72);
   const [finPaid, setFinPaid] = useState(0);
 
-  // Estimate trade-in equity for financed cars
-  // Simple model: remaining balance ≈ instalment * remaining months * 0.7 (rough), assume current market value ≈ instalment * total term * 0.55
   const remainingMonths = Math.max(0, finTerm - finPaid);
   const estSettlement = Math.round(finInstalment * remainingMonths * 0.7);
   const estMarketValue = Math.round(finInstalment * finTerm * 0.55);
-  const finEquity = estMarketValue - estSettlement; // can be negative (shortfall)
+  const finEquity = estMarketValue - estSettlement;
 
   let tradeIn = 0;
   if (tradeMode === "owned") tradeIn = ownedValue;
@@ -81,207 +83,442 @@ function ReducePriceModal({ car, onClose }: { car: typeof CARS[0]; onClose: () =
 
   const discountAmt = Math.round(basePrice * discountPct / 100);
   const afterDiscount = basePrice - discountAmt;
-  const balloonAmt = Math.round(afterDiscount * balloonPct / 100);
+  const balloonAmt = balloonOn ? Math.round(afterDiscount * balloonPct / 100) : 0;
   const financed = Math.max(0, afterDiscount - deposit - tradeIn - balloonAmt);
   const r = 0.115 / 12;
   const n = 72;
   const monthly = financed > 0 ? Math.round((financed * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) : 0;
   const originalMonthly = Math.round((basePrice * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
-  const visiblePrice = afterDiscount;
+  const totalSaving = basePrice - (afterDiscount - deposit - tradeIn);
+  const monthlySaving = originalMonthly - monthly;
 
-  // Predicted residual values (typical SA depreciation curves: ~55% at 48mo, ~45% at 60mo, ~38% at 72mo)
+  // Residual values
   const residual48 = Math.round(basePrice * 0.55);
   const residual60 = Math.round(basePrice * 0.45);
   const residual72 = Math.round(basePrice * 0.38);
   const residuals: Record<number, number> = { 48: residual48, 60: residual60, 72: residual72 };
-  // Warn if balloon at 72mo > residual72 (likely upside-down)
-  const balloonRiskAt72 = balloonAmt > residual72;
+
+  // Affordability (assume user income ~R25k from prequal context)
+  const assumedIncome = 25000;
+  const ratio = monthly / assumedIncome;
+  const affordability = ratio <= 0.25 ? { label: "Comfortable", icon: "✅", color: "text-success", bg: "bg-success-bg" }
+    : ratio <= 0.35 ? { label: "Stretch", icon: "⚠️", color: "text-warning", bg: "bg-warning-bg" }
+    : { label: "Risky", icon: "❌", color: "text-danger", bg: "bg-danger-bg" };
+
+  // Discount likelihood labels
+  const discountLabel = discountPct <= 3 ? { text: "High acceptance chance", color: "text-success" }
+    : discountPct <= 8 ? { text: "Fair market deal", color: "text-terra" }
+    : { text: "Low chance of approval", color: "text-warning" };
+
+  // Deposit impact on monthly
+  const depositMonthlyImpact = deposit > 0
+    ? Math.round(((deposit) * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1))
+    : 0;
 
   const scarcityCount = 100 + (car.id * 17) % 80;
+
+  // Presets
+  function applyPreset(preset: "lowest" | "value" | "norisk") {
+    if (preset === "lowest") {
+      setDiscountPct(10);
+      setDeposit(Math.round(basePrice * 0.1));
+      setBalloonOn(true);
+      setBalloonPct(30);
+      setStep(3);
+    } else if (preset === "value") {
+      setDiscountPct(5);
+      setDeposit(Math.round(basePrice * 0.15));
+      setBalloonOn(false);
+      setBalloonPct(0);
+      setStep(2);
+    } else {
+      setDiscountPct(5);
+      setDeposit(0);
+      setBalloonOn(false);
+      setBalloonPct(0);
+      setStep(1);
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-foreground/40 flex items-end justify-center z-50" onClick={onClose}>
       <div className="bg-card rounded-t-2xl p-6 w-full max-w-md max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <h3 className="font-heading text-xl font-bold text-foreground mb-1">💰 Reduce your price</h3>
-        <p className="text-[13px] text-soft mb-3">{car.year} {car.make} {car.model}</p>
 
-        <div className="bg-danger-bg border border-danger/30 rounded-lg px-3.5 py-2.5 mb-4 flex items-start gap-2">
-          <Flame size={14} className="text-danger shrink-0 mt-0.5" />
-          <p className="text-xs text-danger leading-relaxed m-0 font-semibold">
-            🔥 {scarcityCount} people have asked for a reduced price on this car this week.
-          </p>
+        {/* Header */}
+        <h3 className="font-heading text-xl font-bold text-foreground mb-0.5">Build a deal you can afford</h3>
+        <p className="text-[13px] text-soft mb-1">{car.year} {car.make} {car.model}</p>
+
+        {/* 3-step mental model */}
+        <div className="flex gap-1 mb-4">
+          {[
+            { n: 1, label: "Set target" },
+            { n: 2, label: "Adjust deal" },
+            { n: 3, label: "Future cost" },
+          ].map(s => (
+            <button
+              key={s.n}
+              onClick={() => setStep(s.n)}
+              className={`flex-1 py-1.5 rounded-full text-[10px] font-semibold cursor-pointer border transition-colors ${
+                step >= s.n ? "bg-terra text-primary-foreground border-terra" : "bg-muted text-soft border-sand"
+              }`}
+            >
+              {s.n}. {s.label}
+            </button>
+          ))}
         </div>
 
-        <div className="bg-muted rounded-2xl px-5 py-4 text-center mb-4">
-          <p className="text-xs text-soft mb-1 m-0">Your reduced price</p>
-          <p className="font-heading text-3xl font-bold text-terra m-0 mb-1">R{visiblePrice.toLocaleString()}</p>
-          <p className="text-xs text-soft m-0">From R{basePrice.toLocaleString()} · Save R{(basePrice - visiblePrice).toLocaleString()}</p>
-          <div className="mt-3 pt-3 border-t border-sand/60">
-            <p className="text-[10px] uppercase tracking-wider text-soft m-0 mb-1 font-semibold">New monthly instalment</p>
-            <p className="font-heading text-2xl font-bold text-foreground m-0">R{monthly.toLocaleString()}<span className="text-sm font-semibold text-soft">/pm</span></p>
-            <p className="text-[11px] text-soft m-0 mt-0.5">vs. R{originalMonthly.toLocaleString()}/pm · 72 mo @ 11.5%</p>
-            {monthly < originalMonthly && (
-              <p className="text-[11px] text-success font-semibold m-0 mt-1">↓ R{(originalMonthly - monthly).toLocaleString()}/pm saved</p>
-            )}
+        {/* Optimisation banner */}
+        <div className="bg-terra/10 border border-terra/20 rounded-lg px-3 py-2 mb-4">
+          <p className="text-[11px] text-terra m-0 font-semibold">🧠 We optimise your deal to maximise approval chances</p>
+        </div>
+
+        {/* PRIMARY: Monthly payment anchor */}
+        <div className="bg-muted rounded-2xl px-5 py-5 text-center mb-4">
+          <p className="text-[10px] uppercase tracking-wider text-soft m-0 mb-1 font-semibold">Your monthly payment</p>
+          <p className="font-heading text-4xl font-bold text-terra m-0 mb-1">R{monthly.toLocaleString()}<span className="text-lg font-semibold text-soft">/pm</span></p>
+
+          {/* Affordability badge */}
+          <div className={`inline-flex items-center gap-1.5 ${affordability.bg} px-3 py-1 rounded-full mt-1 mb-2`}>
+            <span className="text-sm">{affordability.icon}</span>
+            <span className={`text-[11px] font-semibold ${affordability.color}`}>{affordability.label}</span>
+          </div>
+
+          <div className="flex justify-between text-xs text-soft mt-2">
+            <span>Total: R{(afterDiscount - deposit - tradeIn).toLocaleString()}</span>
+            <span>Save: R{totalSaving > 0 ? totalSaving.toLocaleString() : "0"}</span>
           </div>
           {balloonAmt > 0 && (
-            <p className="text-[11px] text-warning mt-2 m-0">+ R{balloonAmt.toLocaleString()} balloon due at end</p>
+            <p className="text-[11px] text-warning mt-1.5 m-0">+ R{balloonAmt.toLocaleString()} balloon due at end</p>
           )}
         </div>
 
-        {/* Discount offer */}
+        {/* Quick presets */}
         <div className="mb-4">
-          <div className="flex justify-between mb-1.5">
-            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Discount offer</label>
-            <span className="text-xs font-bold text-success">{discountPct}% · -R{discountAmt.toLocaleString()}</span>
-          </div>
-          <input type="range" min={0} max={15} value={discountPct} onChange={e => setDiscountPct(parseInt(e.target.value))} className="w-full accent-terra" />
-        </div>
-
-        {/* Deposit */}
-        <div className="mb-4">
-          <div className="flex justify-between mb-1.5">
-            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Deposit</label>
-            <span className="text-xs font-bold text-foreground">R{deposit.toLocaleString()}</span>
-          </div>
-          <input
-            type="number"
-            value={deposit || ""}
-            onChange={e => setDeposit(Math.max(0, parseInt(e.target.value) || 0))}
-            placeholder="Enter cash deposit"
-            className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
-          />
-        </div>
-
-        {/* Trade-in value */}
-        <div className="mb-4">
-          <div className="flex justify-between mb-1.5">
-            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Trade-in value</label>
-            <span className="text-xs font-bold text-foreground">R{tradeIn.toLocaleString()}</span>
-          </div>
-          <div className="flex gap-2 mb-2">
-            {([["owned", "I own my car"], ["financed", "Under finance"]] as const).map(([val, label]) => (
+          <p className="text-[10px] uppercase tracking-wider text-soft font-semibold mb-2">Not sure? Try a preset</p>
+          <div className="flex gap-1.5">
+            {[
+              { key: "lowest" as const, label: "Lowest monthly" },
+              { key: "value" as const, label: "Best long-term" },
+              { key: "norisk" as const, label: "No risk" },
+            ].map(p => (
               <button
-                key={val}
-                onClick={() => setTradeMode(tradeMode === val ? "none" : val)}
-                className={`flex-1 py-2 rounded-lg text-xs font-semibold cursor-pointer border-[1.5px] transition-colors ${
-                  tradeMode === val ? "bg-terra text-primary-foreground border-terra" : "bg-card text-soft border-sand"
-                }`}
+                key={p.key}
+                onClick={() => applyPreset(p.key)}
+                className="flex-1 py-2 rounded-lg text-[10px] font-semibold cursor-pointer border border-sand bg-card text-soft hover:border-terra hover:text-terra transition-colors"
               >
-                {label}
+                {p.label}
               </button>
             ))}
           </div>
+        </div>
 
-          {tradeMode === "owned" && (
-            <div className="bg-muted/50 rounded-lg p-3 mt-2">
-              <label className="text-[11px] text-soft block mb-1.5 font-semibold">How much do you think your car is worth?</label>
+        {/* STEP 1: Discount */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-1">
+            <div>
+              <label className="text-xs text-foreground font-semibold block">What discount would you like?</label>
+              <p className="text-[10px] text-soft m-0">This is the price you negotiate with the dealer</p>
+            </div>
+            <span className="text-xs font-bold text-success">-R{discountAmt.toLocaleString()}</span>
+          </div>
+          <input type="range" min={0} max={15} value={discountPct} onChange={e => setDiscountPct(parseInt(e.target.value))} className="w-full accent-terra" />
+          <div className="flex justify-between mt-1">
+            <span className="text-[10px] text-soft">0%</span>
+            <span className={`text-[10px] font-semibold ${discountLabel.color}`}>{discountPct}% — {discountLabel.text}</span>
+            <span className="text-[10px] text-soft">15%</span>
+          </div>
+        </div>
+
+        {/* Social proof */}
+        <div className="bg-danger-bg border border-danger/30 rounded-lg px-3 py-2 mb-4 flex items-start gap-2">
+          <Flame size={13} className="text-danger shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[11px] text-danger m-0 font-semibold">{scarcityCount} buyers tried to negotiate this car this week</p>
+            <p className="text-[10px] text-danger/70 m-0 mt-0.5">Most accepted deals: 5–7% discount</p>
+          </div>
+        </div>
+
+        {/* STEP 2: Deposit + Trade-in (progressive) */}
+        {step < 2 ? (
+          <button onClick={() => setStep(2)} className="w-full py-2.5 rounded-lg border border-sand bg-card text-soft text-xs font-semibold cursor-pointer mb-4 hover:border-terra transition-colors">
+            + Add deposit or trade-in to lower your payment
+          </button>
+        ) : (
+          <div className="mb-4 border border-sand rounded-xl p-4">
+            <p className="text-[10px] uppercase tracking-wider text-soft font-semibold mb-3">Adjust your deal</p>
+
+            {/* Deposit */}
+            <div className="mb-4">
+              <label className="text-xs text-foreground font-semibold block mb-0.5">How much can you pay upfront?</label>
+              <p className="text-[10px] text-soft m-0 mb-2">Adding a deposit lowers your monthly payment and interest.</p>
               <input
                 type="number"
-                value={ownedValue || ""}
-                onChange={e => setOwnedValue(Math.max(0, parseInt(e.target.value) || 0))}
-                placeholder="e.g. 120000"
-                className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+                value={deposit || ""}
+                onChange={e => setDeposit(Math.max(0, parseInt(e.target.value) || 0))}
+                placeholder="Enter cash deposit (e.g. 10000)"
+                className="w-full px-3 py-2.5 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
               />
+              {deposit > 0 && (
+                <p className="text-[11px] text-success font-semibold m-0 mt-1.5">
+                  Adding R{deposit.toLocaleString()} saves you ~R{depositMonthlyImpact.toLocaleString()}/pm
+                </p>
+              )}
             </div>
-          )}
 
-          {tradeMode === "financed" && (
-            <div className="bg-muted/50 rounded-lg p-3 mt-2 space-y-2.5">
-              <div>
-                <label className="text-[11px] text-soft block mb-1 font-semibold">Current monthly instalment (R)</label>
-                <input
-                  type="number"
-                  value={finInstalment || ""}
-                  onChange={e => setFinInstalment(Math.max(0, parseInt(e.target.value) || 0))}
-                  placeholder="e.g. 3500"
-                  className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
-                />
+            {/* Trade-in */}
+            <div>
+              <label className="text-xs text-foreground font-semibold block mb-0.5">Do you have a car to trade in?</label>
+              <p className="text-[10px] text-soft m-0 mb-2">Your trade-in reduces what you need to finance.</p>
+              <div className="flex gap-1.5 mb-2">
+                {([
+                  ["none", "No"],
+                  ["owned", "Yes – fully paid"],
+                  ["financed", "Yes – still financed"],
+                ] as const).map(([val, label]) => (
+                  <button
+                    key={val}
+                    onClick={() => setTradeMode(val)}
+                    className={`flex-1 py-2 rounded-lg text-[10px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                      tradeMode === val ? "bg-terra text-primary-foreground border-terra" : "bg-card text-soft border-sand"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-              <div>
-                <label className="text-[11px] text-soft block mb-1 font-semibold">Original term</label>
-                <div className="flex gap-1.5">
-                  {[60, 72, 84].map(t => (
-                    <button
-                      key={t}
-                      onClick={() => setFinTerm(t)}
-                      className={`flex-1 py-1.5 rounded-md text-xs font-semibold cursor-pointer border transition-colors ${
-                        finTerm === t ? "bg-foreground text-card border-foreground" : "bg-card text-soft border-sand"
-                      }`}
-                    >
-                      {t} mo
-                    </button>
-                  ))}
+
+              {tradeMode === "owned" && (
+                <div className="bg-muted/50 rounded-lg p-3 mt-2">
+                  <label className="text-[11px] text-soft block mb-1.5 font-semibold">How much do you think your car is worth?</label>
+                  <input
+                    type="number"
+                    value={ownedValue || ""}
+                    onChange={e => setOwnedValue(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="e.g. 120000"
+                    className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+                  />
+                  {ownedValue > 0 && (
+                    <p className="text-[11px] text-success font-semibold m-0 mt-1.5">
+                      Trade-in of R{ownedValue.toLocaleString()} applied to your deal
+                    </p>
+                  )}
                 </div>
+              )}
+
+              {tradeMode === "financed" && (
+                <div className="bg-muted/50 rounded-lg p-3 mt-2 space-y-2.5">
+                  <div>
+                    <label className="text-[11px] text-soft block mb-1 font-semibold">What's your current monthly instalment? (R)</label>
+                    <input
+                      type="number"
+                      value={finInstalment || ""}
+                      onChange={e => setFinInstalment(Math.max(0, parseInt(e.target.value) || 0))}
+                      placeholder="e.g. 3500"
+                      className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-soft block mb-1 font-semibold">Original term</label>
+                    <div className="flex gap-1.5">
+                      {[60, 72, 84].map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setFinTerm(t)}
+                          className={`flex-1 py-1.5 rounded-md text-xs font-semibold cursor-pointer border transition-colors ${
+                            finTerm === t ? "bg-foreground text-card border-foreground" : "bg-card text-soft border-sand"
+                          }`}
+                        >
+                          {t} mo
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-soft block mb-1 font-semibold">Months you've already paid</label>
+                    <input
+                      type="number"
+                      value={finPaid || ""}
+                      onChange={e => setFinPaid(Math.max(0, Math.min(finTerm, parseInt(e.target.value) || 0)))}
+                      placeholder={`0 – ${finTerm}`}
+                      className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
+                    />
+                  </div>
+                  {finInstalment > 0 && finPaid > 0 && (
+                    <div className={`rounded-lg p-2.5 ${finEquity >= 0 ? "bg-success-bg" : "bg-warning-bg"}`}>
+                      <p className={`text-[11px] m-0 font-semibold ${finEquity >= 0 ? "text-success" : "text-warning"}`}>
+                        Settlement: R{estSettlement.toLocaleString()} · Market value: R{estMarketValue.toLocaleString()}
+                      </p>
+                      <p className={`text-xs m-0 mt-0.5 font-bold ${finEquity >= 0 ? "text-success" : "text-warning"}`}>
+                        {finEquity >= 0
+                          ? `✅ Equity: R${finEquity.toLocaleString()} applied as trade-in`
+                          : `⚠ Shortfall: R${Math.abs(finEquity).toLocaleString()} — we'll structure to absorb it`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: Balloon + Future value (progressive) */}
+        {step < 3 ? (
+          step >= 2 && (
+            <button onClick={() => setStep(3)} className="w-full py-2.5 rounded-lg border border-sand bg-card text-soft text-xs font-semibold cursor-pointer mb-4 hover:border-terra transition-colors">
+              + Explore balloon & future car value (advanced)
+            </button>
+          )
+        ) : (
+          <div className="mb-4 border border-sand rounded-xl p-4">
+            <p className="text-[10px] uppercase tracking-wider text-soft font-semibold mb-3">Understand your future cost</p>
+
+            {/* Balloon toggle */}
+            <div className="mb-3">
+              <label className="text-xs text-foreground font-semibold block mb-0.5">Lower your monthly payment (balloon option)</label>
+              <p className="text-[10px] text-soft m-0 mb-2">A balloon defers part of the cost to a lump sum at the end of your term.</p>
+
+              <div className="flex gap-2 mb-2">
+                <button
+                  onClick={() => { setBalloonOn(false); setBalloonPct(0); }}
+                  className={`flex-1 py-2 rounded-lg text-[10px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                    !balloonOn ? "bg-terra text-primary-foreground border-terra" : "bg-card text-soft border-sand"
+                  }`}
+                >
+                  No balloon
+                </button>
+                <button
+                  onClick={() => { setBalloonOn(true); setBalloonPct(balloonPct || 20); }}
+                  className={`flex-1 py-2 rounded-lg text-[10px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                    balloonOn ? "bg-terra text-primary-foreground border-terra" : "bg-card text-soft border-sand"
+                  }`}
+                >
+                  Add balloon
+                </button>
               </div>
-              <div>
-                <label className="text-[11px] text-soft block mb-1 font-semibold">Months you've already paid</label>
-                <input
-                  type="number"
-                  value={finPaid || ""}
-                  onChange={e => setFinPaid(Math.max(0, Math.min(finTerm, parseInt(e.target.value) || 0)))}
-                  placeholder={`0 – ${finTerm}`}
-                  className="w-full px-3 py-2 rounded-lg border-[1.5px] border-sand text-sm text-foreground bg-background font-body outline-none focus:border-terra transition-colors"
-                />
+
+              {!balloonOn && (
+                <div className="bg-muted/50 rounded-lg px-3 py-2">
+                  <p className="text-[10px] text-soft m-0">No large final payment. Higher monthly cost.</p>
+                </div>
+              )}
+
+              {balloonOn && (
+                <>
+                  <input type="range" min={5} max={35} step={5} value={balloonPct} onChange={e => setBalloonPct(parseInt(e.target.value))} className="w-full accent-terra" />
+                  <div className="flex justify-between mt-0.5 mb-2">
+                    <span className="text-[10px] text-soft">5%</span>
+                    <span className="text-[10px] font-semibold text-terra">{balloonPct}% · R{balloonAmt.toLocaleString()} due at end</span>
+                    <span className="text-[10px] text-soft">35%</span>
+                  </div>
+
+                  {/* Visual: monthly ↓ final ↑ */}
+                  <div className="bg-muted/50 rounded-lg px-3 py-2.5 mb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-center">
+                        <p className="text-[10px] text-soft m-0">Monthly payments</p>
+                        <p className="text-sm font-bold text-success m-0">↓ R{monthly.toLocaleString()}</p>
+                      </div>
+                      <span className="text-soft text-lg">→</span>
+                      <div className="text-center">
+                        <p className="text-[10px] text-soft m-0">Final payment</p>
+                        <p className="text-sm font-bold text-warning m-0">↑ R{balloonAmt.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-terra/10 rounded-lg px-3 py-2">
+                    <p className="text-[10px] text-terra m-0">✅ Good if you plan to sell/trade-in later</p>
+                    <p className="text-[10px] text-warning m-0 mt-0.5">⚠️ Risky if you plan to keep the car long-term</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Predicted car value = decision */}
+            <div className="mt-3 bg-muted/60 rounded-lg p-3">
+              <p className="text-xs text-foreground font-semibold m-0 mb-0.5">What your car could be worth later</p>
+              <p className="text-[10px] text-soft m-0 mb-2">Compare against your balloon to see if you're covered.</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[48, 60, 72].map(term => {
+                  const val = residuals[term];
+                  const safe = balloonAmt === 0 || balloonAmt <= val;
+                  return (
+                    <div key={term} className={`rounded-md p-2 text-center border ${safe ? "border-sand bg-card" : "border-warning/40 bg-warning-bg"}`}>
+                      <p className="text-[10px] text-soft m-0">{term} months</p>
+                      <p className="text-xs font-bold text-foreground m-0">R{(val / 1000).toFixed(0)}k</p>
+                      {balloonAmt > 0 && (
+                        <p className={`text-[9px] m-0 mt-0.5 font-semibold ${safe ? "text-success" : "text-warning"}`}>
+                          {safe ? "✓ covers balloon" : "⚠ owes more than value"}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              {finInstalment > 0 && finPaid > 0 && (
-                <div className={`rounded-lg p-2.5 ${finEquity >= 0 ? "bg-success-bg" : "bg-warning-bg"}`}>
-                  <p className={`text-[11px] m-0 font-semibold ${finEquity >= 0 ? "text-success" : "text-warning"}`}>
-                    Est. settlement: R{estSettlement.toLocaleString()} · Market value: R{estMarketValue.toLocaleString()}
-                  </p>
-                  <p className={`text-xs m-0 mt-0.5 font-bold ${finEquity >= 0 ? "text-success" : "text-warning"}`}>
-                    {finEquity >= 0
-                      ? `✅ Equity: R${finEquity.toLocaleString()} (used as trade-in)`
-                      : `⚠ Shortfall: R${Math.abs(finEquity).toLocaleString()} — we'll structure to absorb it`}
+              {balloonAmt > 0 && (
+                <div className={`mt-2 rounded-lg px-3 py-2 ${balloonAmt <= residual72 ? "bg-success-bg" : "bg-warning-bg"}`}>
+                  <p className={`text-[10px] m-0 font-semibold ${balloonAmt <= residual72 ? "text-success" : "text-warning"}`}>
+                    {balloonAmt <= residual72
+                      ? `Car value at 72 mo: R${(residual72/1000).toFixed(0)}k vs balloon R${(balloonAmt/1000).toFixed(0)}k → You're likely covered ✅`
+                      : `Car value at 72 mo: R${(residual72/1000).toFixed(0)}k vs balloon R${(balloonAmt/1000).toFixed(0)}k → You may owe more than the car is worth ⚠️`}
                   </p>
                 </div>
               )}
             </div>
-          )}
-        </div>
-
-        {/* Balloon */}
-        <div className="mb-5">
-          <div className="flex justify-between mb-1.5">
-            <label className="text-[11px] text-soft font-semibold uppercase tracking-wider">Balloon payment</label>
-            <span className="text-xs font-bold text-terra">{balloonPct}% · R{balloonAmt.toLocaleString()}</span>
           </div>
-          <input type="range" min={0} max={35} step={5} value={balloonPct} onChange={e => setBalloonPct(parseInt(e.target.value))} className="w-full accent-terra" />
-          <p className="text-[10px] text-soft mt-1 m-0">A balloon lowers monthly but is due as a lump sum at term end.</p>
+        )}
 
-          {/* Predicted residual values by term */}
-          <div className="mt-3 bg-muted/60 rounded-lg p-3">
-            <p className="text-[10px] uppercase tracking-wider text-soft font-semibold m-0 mb-2">Predicted car value at term end</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[48, 60, 72].map(term => {
-                const val = residuals[term];
-                const safe = balloonAmt === 0 || balloonAmt <= val;
-                return (
-                  <div key={term} className={`rounded-md p-2 text-center border ${safe ? "border-sand bg-card" : "border-warning/40 bg-warning-bg"}`}>
-                    <p className="text-[10px] text-soft m-0">{term} mo</p>
-                    <p className="text-xs font-bold text-foreground m-0">R{(val / 1000).toFixed(0)}k</p>
-                    {balloonAmt > 0 && (
-                      <p className={`text-[9px] m-0 font-semibold ${safe ? "text-success" : "text-warning"}`}>
-                        {safe ? "✓ covers balloon" : "⚠ short"}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
+        {/* What changed summary */}
+        {(discountPct > 0 || deposit > 0 || tradeIn > 0 || balloonAmt > 0) && (
+          <div className="bg-muted rounded-xl px-4 py-3 mb-4">
+            <p className="text-[10px] uppercase tracking-wider text-soft font-semibold m-0 mb-2">What changed</p>
+            <div className="space-y-1">
+              {discountPct > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-soft">Discount ({discountPct}%)</span>
+                  <span className="text-success font-semibold">-R{discountAmt.toLocaleString()}</span>
+                </div>
+              )}
+              {deposit > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-soft">Deposit</span>
+                  <span className="text-success font-semibold">-R{deposit.toLocaleString()}</span>
+                </div>
+              )}
+              {tradeIn > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-soft">Trade-in</span>
+                  <span className="text-success font-semibold">-R{tradeIn.toLocaleString()}</span>
+                </div>
+              )}
+              {balloonAmt > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-soft">Balloon deferred</span>
+                  <span className="text-warning font-semibold">-R{balloonAmt.toLocaleString()} (due later)</span>
+                </div>
+              )}
+              <div className="border-t border-sand pt-1.5 mt-1.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-foreground font-semibold">Monthly change</span>
+                  <span className="text-success font-bold">↓ R{monthlySaving > 0 ? monthlySaving.toLocaleString() : "0"}/pm saved</span>
+                </div>
+              </div>
             </div>
-            {balloonRiskAt72 && (
-              <p className="text-[10px] text-warning m-0 mt-2 font-semibold">
-                ⚠ At 72 months, balloon may exceed the car's value — risk of negative equity.
-              </p>
-            )}
           </div>
+        )}
+
+        {/* Smart hint */}
+        <div className="bg-muted/50 rounded-lg px-3 py-2 mb-4">
+          <p className="text-[10px] text-soft m-0">💡 Not sure what to choose? We'll recommend the best deal after this step.</p>
         </div>
 
-        <button onClick={onClose} className="w-full py-3 rounded-full bg-terra text-primary-foreground border-none text-sm font-semibold cursor-pointer mb-2">
-          Apply this price
+        {/* CTA */}
+        <button onClick={onClose} className="w-full py-3.5 rounded-full bg-terra text-primary-foreground border-none text-sm font-bold cursor-pointer mb-1">
+          Continue with this deal
         </button>
-        <button onClick={onClose} className="w-full py-2.5 rounded-full bg-transparent text-soft border-none text-xs cursor-pointer">
-          Close
+        <p className="text-[10px] text-soft text-center m-0 mb-2">You'll see your approval chances next</p>
+        <button onClick={onClose} className="w-full py-2 rounded-full bg-transparent text-soft border-none text-xs cursor-pointer">
+          Cancel
         </button>
       </div>
     </div>
