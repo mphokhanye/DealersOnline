@@ -666,6 +666,7 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
   const [pendingBankCar, setPendingBankCar] = useState<typeof CARS[0] | null>(null);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [showContractScan, setShowContractScan] = useState(false);
+  const [carDeals, setCarDeals] = useState<Record<number, DealChanges>>({});
   const name = prequalified ? "Lerato" : "there";
   const isCash = answers?.paymenttype === "cash";
 
