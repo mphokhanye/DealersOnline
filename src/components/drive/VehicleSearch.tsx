@@ -841,8 +841,17 @@ export function VehicleSearch({ query, answers, na, prequalified, onNav }: Vehic
                   <p className="text-[13px] text-soft m-0">{cur.mileage} · {cur.transmission} · {cur.fuelType}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-terra m-0 mb-0.5">{isCash ? cur.price : cur.monthly}</p>
-                  {!isCash && <p className="text-[11px] text-soft m-0">{cur.price} total</p>}
+                  {carDeals[cur.id] ? (
+                    <>
+                      <p className="text-xl font-bold text-terra m-0 mb-0.5">R{carDeals[cur.id].newMonthly.toLocaleString()}/pm</p>
+                      <p className="text-[11px] text-soft m-0 line-through">{cur.monthly}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xl font-bold text-terra m-0 mb-0.5">{isCash ? cur.price : cur.monthly}</p>
+                      {!isCash && <p className="text-[11px] text-soft m-0">{cur.price} total</p>}
+                    </>
+                  )}
                 </div>
               </div>
 
