@@ -15,7 +15,7 @@ export function TopBar({ title, onBack }: TopBarProps) {
           </button>
         )}
         <span className="font-heading text-lg font-bold text-foreground tracking-tight">
-          {title || <>Find<span className="text-terra">&</span>Drive.</>}
+          {title || <>Find<span className="text-terra">&</span>Drive<span className="text-terra">.</>}
         </span>
       </div>
     </div>
