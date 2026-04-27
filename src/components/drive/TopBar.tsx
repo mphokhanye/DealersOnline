@@ -1,3 +1,10 @@
+import { ArrowLeft } from "lucide-react";
+
+interface TopBarProps {
+  title?: string;
+  onBack?: () => void;
+}
+
 export function TopBar({ title, onBack }: TopBarProps) {
   return (
     <div className="bg-card border-b border-sand px-5 py-3.5 flex items-center justify-between sticky top-0 z-50">
