@@ -11,6 +11,7 @@ const TYPING_QUERIES = [
   "Alternatives for a Nissan Magnite?",
   "Which SUV has the lowest fuel cost?",
   "Can I afford a BMW 3 Series?",
+  "I earn R30k and I want a Mercedes Benz A200. Can you help me?",
 ];
 
 function useTypingAnimation() {
@@ -82,7 +83,7 @@ export function Landing({ onNav }: LandingProps) {
         <div className="px-5 pt-16 pb-6 max-w-md mx-auto text-center">
           <p className="text-xs uppercase tracking-[3px] text-terra font-semibold mb-3">YOUR PERSONAL CAR ASSISTANT</p>
           <h1 className="font-heading text-[28px] font-bold text-foreground leading-tight mb-2">
-            You're in control. We just make<br />it quick and easy.
+            Your car buying journey starts with a question.<br />Any question.
           </h1>
         </div>
       </div>
