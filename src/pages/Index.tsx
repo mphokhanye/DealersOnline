@@ -5,8 +5,9 @@ import { Profiling } from "@/components/drive/Profiling";
 import { NeedsAnalysis } from "@/components/drive/NeedsAnalysis";
 import { Prequal } from "@/components/drive/Prequal";
 import { VehicleSearch } from "@/components/drive/VehicleSearch";
+import { QualityComparison } from "@/components/drive/QualityComparison";
 
-type Screen = "landing" | "loading" | "profiling" | "needs" | "prequal" | "vehicleSearch";
+type Screen = "landing" | "loading" | "profiling" | "needs" | "prequal" | "vehicleSearch" | "compare";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("landing");
@@ -34,6 +35,8 @@ const Index = () => {
       return <Prequal query={ctx.query || ""} answers={ctx.answers || {}} na={ctx.na || {}} onNav={nav} />;
     case "vehicleSearch":
       return <VehicleSearch query={ctx.query || ""} answers={ctx.answers || {}} na={ctx.na || {}} prequalified={ctx.prequalified || false} monthly={ctx.monthly} onNav={nav} />;
+    case "compare":
+      return <QualityComparison onNav={nav} />;
     default:
       return <Landing onNav={nav} />;
   }
