@@ -59,7 +59,7 @@ export function Landing({ onNav }: LandingProps) {
 
   const ctaBtns = [
     { label: "Search cars", icon: Search, action: () => submit("Search cars") },
-    { label: "Compare cars", icon: GitCompare, action: () => onNav("compare") },
+    { label: "Compare cars", icon: GitCompare, action: () => onNav("compareIntro") },
     { label: "Pre-approval", icon: CheckCircle, action: () => submit("Pre-approval") },
     { label: "Car offers", icon: null, action: () => submit("Car offers") },
     { label: "Interest rates", icon: CheckCircle, action: () => submit("Interest rates") },
