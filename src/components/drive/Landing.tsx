@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, ArrowRight, Mic, Send, CheckCircle } from "lucide-react";
+import { Search, ArrowRight, Mic, Send, CheckCircle, GitCompare } from "lucide-react";
 
 interface LandingProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
@@ -58,10 +58,11 @@ export function Landing({ onNav }: LandingProps) {
   const typingText = useTypingAnimation();
 
   const ctaBtns = [
-    { label: "Search cars", icon: Search },
-    { label: "Pre-approval", icon: CheckCircle },
-    { label: "Car offers", icon: null },
-    { label: "Interest rates", icon: CheckCircle },
+    { label: "Search cars", icon: Search, action: () => submit("Search cars") },
+    { label: "Compare cars", icon: GitCompare, action: () => onNav("compare") },
+    { label: "Pre-approval", icon: CheckCircle, action: () => submit("Pre-approval") },
+    { label: "Car offers", icon: null, action: () => submit("Car offers") },
+    { label: "Interest rates", icon: CheckCircle, action: () => submit("Interest rates") },
   ];
   const examples = [
     "What interest rate will the bank give me?",
@@ -119,7 +120,7 @@ export function Landing({ onNav }: LandingProps) {
           {ctaBtns.map(b => (
             <button
               key={b.label}
-              onClick={() => submit(b.label)}
+              onClick={b.action}
               className="bg-card border border-sand text-foreground rounded-full px-4 py-2.5 text-sm font-medium cursor-pointer font-body hover:border-terra hover:text-terra transition-colors flex items-center gap-2"
             >
               {b.icon && <b.icon size={14} className="text-terra" />}
