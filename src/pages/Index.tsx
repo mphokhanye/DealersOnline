@@ -36,6 +36,9 @@ const Index = () => {
       return <Prequal query={ctx.query || ""} answers={ctx.answers || {}} na={ctx.na || {}} onNav={nav} />;
     case "vehicleSearch":
       return <VehicleSearch query={ctx.query || ""} answers={ctx.answers || {}} na={ctx.na || {}} prequalified={ctx.prequalified || false} monthly={ctx.monthly} onNav={nav} />;
+    case "compareIntro":
+    case "compareSelect":
+      return <CompareIntro onNav={nav} />;
     case "compare":
       return <QualityComparison onNav={nav} />;
     default:
