@@ -6,8 +6,9 @@ import { NeedsAnalysis } from "@/components/drive/NeedsAnalysis";
 import { Prequal } from "@/components/drive/Prequal";
 import { VehicleSearch } from "@/components/drive/VehicleSearch";
 import { QualityComparison } from "@/components/drive/QualityComparison";
+import { CompareIntro } from "@/components/drive/CompareIntro";
 
-type Screen = "landing" | "loading" | "profiling" | "needs" | "prequal" | "vehicleSearch" | "compare";
+type Screen = "landing" | "loading" | "profiling" | "needs" | "prequal" | "vehicleSearch" | "compareIntro" | "compareSelect" | "compare";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("landing");
