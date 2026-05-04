@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Search } from "lucide-react";
 
 interface CompareIntroProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
