@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, X, Zap, Gauge, Fuel, Shield, Wrench, Music4, Lightbulb } from "lucide-react";
+import { ArrowLeft, X, Zap, Gauge, Fuel, Shield, Wrench, Music4, Lightbulb, Calendar, Banknote } from "lucide-react";
 import poloTsi from "@/assets/polo-tsi.webp";
 import poloGti from "@/assets/polo-gti.webp";
 
