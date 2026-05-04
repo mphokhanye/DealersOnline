@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, X, Zap, Gauge, Fuel, Shield, Wrench, Music4, Lightbulb } from "lucide-react";
+import { ArrowLeft, X, Zap, Gauge, Fuel, Shield, Wrench, Music4, Lightbulb, Calendar, Banknote } from "lucide-react";
 import poloTsi from "@/assets/polo-tsi.webp";
 import poloGti from "@/assets/polo-gti.webp";
 
@@ -237,6 +237,30 @@ export function QualityComparison({ onNav }: Props) {
             )}
           </div>
         )}
+      </div>
+
+      {/* CTAs */}
+      <div style={{ padding: "0 20px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+        <button
+          onClick={() => onNav("vehicleSearch", { intent: "testdrive" })}
+          style={{
+            width: "100%", background: T.teal, color: "#fff", border: "none",
+            borderRadius: 12, padding: "14px", fontSize: 14, fontWeight: 600,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}
+        >
+          <Calendar size={16} /> Schedule test drive
+        </button>
+        <button
+          onClick={() => onNav("vehicleSearch", { intent: "bankoffers" })}
+          style={{
+            width: "100%", background: T.bg, color: T.tealDark, border: `1.5px solid ${T.teal}`,
+            borderRadius: 12, padding: "14px", fontSize: 14, fontWeight: 600,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}
+        >
+          <Banknote size={16} /> Get bank offers
+        </button>
       </div>
     </div>
   );
