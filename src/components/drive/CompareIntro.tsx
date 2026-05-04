@@ -194,4 +194,105 @@ function NeedsStep({ step, answers, onAnswer }: { step: Step; answers: Record<st
   );
 }
 
+function SelectStep({ picked, togglePick, onNav }: { picked: string[]; togglePick: (id: string) => void; onNav: (s: string, d?: Record<string, unknown>) => void; }) {
+  const [query, setQuery] = useState("");
+  const recommended = ALL_CARS.filter(c => c.id === "polotsi" || c.id === "pologti");
+  const q = query.trim().toLowerCase();
+  const searchResults = q
+    ? ALL_CARS.filter(c => c.name.toLowerCase().includes(q) || c.variant.toLowerCase().includes(q) || c.tag.toLowerCase().includes(q))
+    : [];
+
+  const renderCard = (c: typeof ALL_CARS[number]) => {
+    const sel = picked.includes(c.id);
+    return (
+      <button
+        key={c.id}
+        onClick={() => togglePick(c.id)}
+        style={{
+          textAlign: "left", background: sel ? T.tealBg : T.bg,
+          border: `1.5px solid ${sel ? T.teal : T.border}`,
+          borderRadius: 14, padding: "14px 16px", cursor: "pointer",
+          display: "flex", gap: 12, alignItems: "flex-start", transition: "all 0.2s", width: "100%"
+        }}
+      >
+        <div style={{
+          width: 22, height: 22, borderRadius: 6,
+          border: `1.5px solid ${sel ? T.teal : T.border}`,
+          background: sel ? T.teal : T.bg,
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2
+        }}>
+          {sel && <Check size={14} color="#fff" strokeWidth={3} />}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 2 }}>
+            <p style={{ fontSize: 15, fontWeight: 700, margin: 0, color: T.ink }}>{c.name}</p>
+            <span style={{ fontSize: 9, fontWeight: 700, color: T.tealDark, background: T.tealBg, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: "0.5px", whiteSpace: "nowrap" }}>{c.tag}</span>
+          </div>
+          <p style={{ fontSize: 12, color: T.muted, margin: "0 0 6px" }}>{c.variant}</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: T.ink, margin: "0 0 4px" }}>Retail {c.price}</p>
+          <p style={{ fontSize: 11.5, color: T.ink2, margin: "0 0 2px", lineHeight: 1.4 }}>
+            <span style={{ color: T.muted }}>Monthly:</span> <strong>{c.monthly}</strong>
+          </p>
+          <p style={{ fontSize: 11.5, color: T.ink2, margin: 0, lineHeight: 1.4 }}>
+            <span style={{ color: T.muted }}>Insurance:</span> <strong>{c.insurance}</strong>
+          </p>
+        </div>
+      </button>
+    );
+  };
+
+  return (
+    <div>
+      <p style={{ fontSize: 11, color: T.tealDark, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 8px" }}>Step 5 of 5</p>
+      <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px", lineHeight: 1.25 }}>
+        Based on your answers, these two cars are your strongest match
+      </h2>
+      <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, margin: "0 0 18px" }}>
+        Pick both to compare — or search below to swap in another car.
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 18 }}>
+        {recommended.map(renderCard)}
+      </div>
+
+      <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 18, marginBottom: 14 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color: T.ink, margin: "0 0 8px" }}>Want to compare a different car?</p>
+        <div style={{ position: "relative", marginBottom: 12 }}>
+          <Search size={15} style={{ position: "absolute", top: "50%", left: 12, transform: "translateY(-50%)", color: T.muted }} />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search by make or model..."
+            style={{
+              width: "100%", border: `1.5px solid ${T.border}`, borderRadius: 12,
+              padding: "12px 14px 12px 36px", fontSize: 14, color: T.ink, outline: "none",
+              background: T.bg, fontFamily: "inherit",
+            }}
+          />
+        </div>
+        {q && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {searchResults.length === 0 ? (
+              <p style={{ fontSize: 13, color: T.muted, margin: 0, padding: "12px 4px" }}>No matches found.</p>
+            ) : searchResults.map(renderCard)}
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={() => onNav("compare")}
+        disabled={picked.length !== 2}
+        style={{
+          width: "100%", background: picked.length === 2 ? T.teal : T.border,
+          color: "#fff", border: "none", borderRadius: 12,
+          padding: "14px", fontSize: 14, fontWeight: 600,
+          cursor: picked.length === 2 ? "pointer" : "not-allowed"
+        }}
+      >
+        {picked.length === 2 ? "Compare these cars →" : `Select ${2 - picked.length} more`}
+      </button>
+    </div>
+  );
+}
+
 export default CompareIntro;
