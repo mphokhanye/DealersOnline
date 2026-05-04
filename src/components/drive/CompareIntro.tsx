@@ -20,8 +20,21 @@ const T = {
 type Step = "needs1" | "needs2" | "needs3" | "prequal" | "select";
 
 const CARS = [
-  { id: "polotsi", name: "VW Polo TSI", variant: "1.0 TSI 70kW Life", price: "from R359,900", tag: "Everyday value" },
-  { id: "pologti", name: "VW Polo GTI", variant: "2.0 TSI 147kW DSG", price: "from R589,900", tag: "Hot hatch" },
+  { id: "polotsi", name: "VW Polo TSI", variant: "1.0 TSI 70kW Life", price: "from R359,900", monthly: "R6,400 – R7,200/m", insurance: "R1,800 – R2,400/m", tag: "Everyday value" },
+  { id: "pologti", name: "VW Polo GTI", variant: "2.0 TSI 147kW DSG", price: "from R589,900", monthly: "R10,800 – R12,100/m", insurance: "R3,500 – R6,500/m", tag: "Hot hatch" },
+];
+
+const ALL_CARS = [
+  ...[
+    { id: "polotsi", name: "VW Polo TSI", variant: "1.0 TSI 70kW Life", price: "from R359,900", monthly: "R6,400 – R7,200/m", insurance: "R1,800 – R2,400/m", tag: "Everyday value" },
+    { id: "pologti", name: "VW Polo GTI", variant: "2.0 TSI 147kW DSG", price: "from R589,900", monthly: "R10,800 – R12,100/m", insurance: "R3,500 – R6,500/m", tag: "Hot hatch" },
+  ],
+  { id: "magnite", name: "Nissan Magnite", variant: "1.0 Turbo Acenta Plus", price: "from R299,900", monthly: "R5,300 – R6,000/m", insurance: "R1,500 – R2,100/m", tag: "Budget SUV" },
+  { id: "tcross", name: "VW T-Cross", variant: "1.0 TSI 85kW Life", price: "from R449,900", monthly: "R8,100 – R9,000/m", insurance: "R2,200 – R3,000/m", tag: "Compact SUV" },
+  { id: "kiger", name: "Renault Kiger", variant: "1.0 Turbo Intens", price: "from R289,900", monthly: "R5,100 – R5,800/m", insurance: "R1,400 – R2,000/m", tag: "Budget SUV" },
+  { id: "swift", name: "Suzuki Swift", variant: "1.2 GL+ Auto", price: "from R249,900", monthly: "R4,400 – R5,000/m", insurance: "R1,300 – R1,800/m", tag: "City hatch" },
+  { id: "i20", name: "Hyundai i20", variant: "1.2 Motion", price: "from R309,900", monthly: "R5,500 – R6,200/m", insurance: "R1,600 – R2,200/m", tag: "City hatch" },
+  { id: "starlet", name: "Toyota Starlet", variant: "1.5 Xs Auto", price: "from R289,900", monthly: "R5,100 – R5,800/m", insurance: "R1,500 – R2,000/m", tag: "Reliable hatch" },
 ];
 
 export function CompareIntro({ onNav }: CompareIntroProps) {
