@@ -20,8 +20,8 @@ const T = {
 type Step = "needs1" | "needs2" | "needs3" | "prequal" | "select";
 
 const CARS = [
-  { id: "magnite", name: "Nissan Magnite", variant: "1.0 Turbo Acenta Plus CVT", price: "from R359,900", tag: "Budget-friendly" },
-  { id: "tcross", name: "VW T-Cross", variant: "1.0 TSI 85kW Style DSG", price: "from R489,900", tag: "Premium quality" },
+  { id: "polotsi", name: "VW Polo TSI", variant: "1.0 TSI 70kW Life", price: "from R359,900", tag: "Everyday value" },
+  { id: "pologti", name: "VW Polo GTI", variant: "2.0 TSI 147kW DSG", price: "from R589,900", tag: "Hot hatch" },
 ];
 
 export function CompareIntro({ onNav }: CompareIntroProps) {
@@ -90,7 +90,7 @@ export function CompareIntro({ onNav }: CompareIntroProps) {
 
             <div style={{ background: T.tealBg, border: `1px solid ${T.teal}30`, borderRadius: 12, padding: "12px 14px", marginBottom: 18 }}>
               <p style={{ fontSize: 12, color: T.ink2, lineHeight: 1.6, margin: 0 }}>
-                💡 <strong>Why this helps:</strong> The Magnite and T-Cross are R130k apart in price. Knowing your approval amount makes the comparison far more useful.
+                💡 <strong>Why this helps:</strong> The Polo TSI and Polo GTI are R230k apart in price. Knowing your approval amount makes the comparison far more useful.
               </p>
             </div>
 
