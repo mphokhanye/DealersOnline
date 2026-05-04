@@ -90,7 +90,7 @@ export function CompareIntro({ onNav }: CompareIntroProps) {
 
             <div style={{ background: T.tealBg, border: `1px solid ${T.teal}30`, borderRadius: 12, padding: "12px 14px", marginBottom: 18 }}>
               <p style={{ fontSize: 12, color: T.ink2, lineHeight: 1.6, margin: 0 }}>
-                💡 <strong>Why this helps:</strong> The Magnite and T-Cross are R130k apart in price. Knowing your approval amount makes the comparison far more useful.
+                💡 <strong>Why this helps:</strong> The Polo TSI and Polo GTI are R230k apart in price. Knowing your approval amount makes the comparison far more useful.
               </p>
             </div>
 
