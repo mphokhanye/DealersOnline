@@ -130,61 +130,7 @@ export function CompareIntro({ onNav }: CompareIntroProps) {
         )}
 
         {step === "select" && (
-          <div>
-            <p style={{ fontSize: 11, color: T.tealDark, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 8px" }}>Step 5 of 5</p>
-            <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px", lineHeight: 1.25 }}>Pick the two cars to compare</h2>
-            <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, margin: "0 0 20px" }}>
-              Based on your answers, these two are your strongest matches in the compact SUV segment.
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-              {CARS.map(c => {
-                const sel = picked.includes(c.id);
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => togglePick(c.id)}
-                    style={{
-                      textAlign: "left", background: sel ? T.tealBg : T.bg,
-                      border: `1.5px solid ${sel ? T.teal : T.border}`,
-                      borderRadius: 14, padding: "14px 16px", cursor: "pointer",
-                      display: "flex", gap: 12, alignItems: "center", transition: "all 0.2s"
-                    }}
-                  >
-                    <div style={{
-                      width: 22, height: 22, borderRadius: 6,
-                      border: `1.5px solid ${sel ? T.teal : T.border}`,
-                      background: sel ? T.teal : T.bg,
-                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
-                    }}>
-                      {sel && <Check size={14} color="#fff" strokeWidth={3} />}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                        <p style={{ fontSize: 15, fontWeight: 700, margin: 0, color: T.ink }}>{c.name}</p>
-                        <span style={{ fontSize: 9, fontWeight: 700, color: T.tealDark, background: T.tealBg, padding: "2px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: "0.5px" }}>{c.tag}</span>
-                      </div>
-                      <p style={{ fontSize: 12, color: T.muted, margin: "0 0 4px" }}>{c.variant}</p>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: T.tealDark, margin: 0 }}>{c.price}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => onNav("compare")}
-              disabled={picked.length !== 2}
-              style={{
-                width: "100%", background: picked.length === 2 ? T.teal : T.border,
-                color: "#fff", border: "none", borderRadius: 12,
-                padding: "14px", fontSize: 14, fontWeight: 600,
-                cursor: picked.length === 2 ? "pointer" : "not-allowed"
-              }}
-            >
-              {picked.length === 2 ? "Compare these cars →" : `Select ${2 - picked.length} more`}
-            </button>
-          </div>
+          <SelectStep picked={picked} togglePick={togglePick} onNav={onNav} />
         )}
       </div>
     </div>
