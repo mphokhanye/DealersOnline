@@ -20,8 +20,8 @@ const T = {
 type Step = "needs1" | "needs2" | "needs3" | "prequal" | "select";
 
 const CARS = [
-  { id: "magnite", name: "Nissan Magnite", variant: "1.0 Turbo Acenta Plus CVT", price: "from R359,900", tag: "Budget-friendly" },
-  { id: "tcross", name: "VW T-Cross", variant: "1.0 TSI 85kW Style DSG", price: "from R489,900", tag: "Premium quality" },
+  { id: "polotsi", name: "VW Polo TSI", variant: "1.0 TSI 70kW Life", price: "from R359,900", tag: "Everyday value" },
+  { id: "pologti", name: "VW Polo GTI", variant: "2.0 TSI 147kW DSG", price: "from R589,900", tag: "Hot hatch" },
 ];
 
 export function CompareIntro({ onNav }: CompareIntroProps) {
