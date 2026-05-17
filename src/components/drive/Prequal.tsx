@@ -8,10 +8,11 @@ interface PrequalProps {
   query: string;
   answers: Record<string, string>;
   na: Record<string, string>;
+  fromCompare?: boolean;
   onNav: (screen: string, data?: Record<string, unknown>) => void;
 }
 
-export function Prequal({ query, answers, na, onNav }: PrequalProps) {
+export function Prequal({ query, answers, na, fromCompare, onNav }: PrequalProps) {
   const [phase, setPhase] = useState<"form" | "loading" | "results">("form");
   const [form, setForm] = useState({ name: "Lerato", surname: "Dlamini", id: "9801010001089", income: "22000" });
   const [consent, setConsent] = useState({ thirdParty: false, terms: false });
