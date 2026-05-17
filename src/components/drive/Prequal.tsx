@@ -147,7 +147,7 @@ export function Prequal({ query, answers, na, fromCompare, onNav }: PrequalProps
         <div className="flex flex-col gap-2 mb-5">
           <button
             onClick={() => fromCompare
-              ? onNav("compare", { prequalified: true, monthly: 5450 })
+              ? onNav("compareSelect", { prequalified: true, monthly: 5450 })
               : onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: 5450 })}
             className="bg-card border-[1.5px] border-sand rounded-xl px-4 py-3.5 text-left cursor-pointer font-body hover:border-success/40 transition-colors"
           >
@@ -155,7 +155,7 @@ export function Prequal({ query, answers, na, fromCompare, onNav }: PrequalProps
               {fromCompare ? "✓ It's perfect — compare cars" : "✓ It's perfect — find my car"}
             </div>
             <div className="text-xs text-soft mt-0.5">
-              {fromCompare ? "Take me to the comparison page" : "Show me 300 cars in this range"}
+              {fromCompare ? "Pick the two cars to compare" : "Show me 300 cars in this range"}
             </div>
           </button>
           <div className="bg-card border-[1.5px] border-sand rounded-xl px-4 py-3.5">
@@ -172,7 +172,7 @@ export function Prequal({ query, answers, na, fromCompare, onNav }: PrequalProps
                 onClick={() => {
                   const m = parseInt(maxMonthly);
                   if (!m || m <= 0) return;
-                  if (fromCompare) onNav("compare", { prequalified: true, monthly: m });
+                  if (fromCompare) onNav("compareSelect", { prequalified: true, monthly: m });
                   else onNav("vehicleSearch", { query, answers, na, prequalified: true, monthly: m });
                 }}
                 disabled={!maxMonthly || parseInt(maxMonthly) <= 0}
