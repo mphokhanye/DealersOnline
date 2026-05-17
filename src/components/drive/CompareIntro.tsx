@@ -3,6 +3,7 @@ import { ArrowLeft, Check, Search } from "lucide-react";
 
 interface CompareIntroProps {
   onNav: (screen: string, data?: Record<string, unknown>) => void;
+  initialStep?: "needs1" | "select";
 }
 
 const T = {
